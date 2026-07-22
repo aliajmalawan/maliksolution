@@ -1,0 +1,22 @@
+# ── Environment / credentials — never commit real values ──
+includes/.env
+ums/config/.env
+
+# ── User-uploaded personal data (photos etc.) — runtime content, not code ──
+# Folders are kept (via .gitkeep) so a fresh clone has the right structure;
+# their actual uploaded contents are never tracked.
+assets/uploads/students/*
+!assets/uploads/students/.gitkeep
+assets/uploads/teachers/*
+!assets/uploads/teachers/.gitkeep
+ums/uploads/students/*
+!ums/uploads/students/.gitkeep
+ums/uploads/teachers/*
+!ums/uploads/teachers/.gitkeep
+ums/uploads/admissions/*
+!ums/uploads/admissions/.gitkeep
+
+# ── OS / editor cruft ──
+.DS_Store
+Thumbs.db
+*.log

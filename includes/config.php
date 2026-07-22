@@ -1,9 +1,11 @@
 <?php
 
-$host = "localhost";
-$user = "root";
-$password = "";
-$database = "maliksolution";
+require_once __DIR__ . '/env.php';
+
+$host     = site_env('DB_HOST', 'localhost');
+$user     = site_env('DB_USER', 'root');
+$password = site_env('DB_PASS', '');
+$database = site_env('DB_NAME', 'maliksolution');
 
 $conn = mysqli_connect($host, $user, $password, $database);
 
