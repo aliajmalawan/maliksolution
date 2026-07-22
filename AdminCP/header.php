@@ -486,6 +486,9 @@ $active_nav = $active_nav ?? '';
     .si-orange { background: #fff8ed; color: #fd7e14; }
     .si-red    { background: #fff0f0; color: #dc3545; }
     .si-purple { background: #f5f0ff; color: #6f42c1; }
+    .si-cyan   { background: #eafcff; color: #0dcaf0; }
+    .si-teal   { background: #eafff9; color: #20c997; }
+    .si-pink   { background: #fff0f6; color: #d63384; }
     .stat-card h3 { font-weight: 900; margin: 0; color: var(--navy); font-size: 1.55rem; }
     .stat-card p  { margin-bottom: .2rem; color: #6c757d; font-size: .8rem; }
 
@@ -743,6 +746,9 @@ $active_nav = $active_nav ?? '';
     html[data-theme="dark"] .si-orange { background: rgba(253,126,20,.15); }
     html[data-theme="dark"] .si-red    { background: rgba(220,53,69,.15); }
     html[data-theme="dark"] .si-purple { background: rgba(111,66,193,.18); }
+    html[data-theme="dark"] .si-cyan   { background: rgba(13,202,240,.15); }
+    html[data-theme="dark"] .si-teal   { background: rgba(32,201,151,.15); }
+    html[data-theme="dark"] .si-pink   { background: rgba(214,51,132,.15); }
     html[data-theme="dark"] .stat-delta.up   { background: rgba(25,135,84,.22); color: #6fdca4; }
     html[data-theme="dark"] .stat-delta.down { background: rgba(220,53,69,.22); color: #f1919b; }
     html[data-theme="dark"] .sb-pending  { background: rgba(255,193,7,.18);  color: #ffd76b; }

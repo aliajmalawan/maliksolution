@@ -72,8 +72,8 @@ $ums_notifications = [
         </span>
       </button>
       <div class="u-pop u-pop-menu" id="popUser" style="width:210px">
-        <a href="#"><i class="fa-solid fa-user"></i>My Profile <span class="u-soon" style="margin-left:auto">soon</span></a>
-        <a href="#"><i class="fa-solid fa-gear"></i>Settings <span class="u-soon" style="margin-left:auto">soon</span></a>
+        <a href="<?= UMS_URL ?>/admin/profile.php"><i class="fa-solid fa-user"></i>My Profile</a>
+        <a href="<?= UMS_URL ?>/modules/settings/index.php"><i class="fa-solid fa-gear"></i>Settings</a>
         <a href="<?= UMS_URL ?>/admin/logout.php" style="color:var(--danger)"><i class="fa-solid fa-right-from-bracket" style="color:var(--danger)"></i>Sign Out</a>
       </div>
     </div>

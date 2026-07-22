@@ -5,22 +5,36 @@ $active_nav = 'dashboard';
 include 'header.php';
 require_once __DIR__ . '/charts.php';
 
+/*
+ * Website CMS Dashboard — shows ONLY website content statistics
+ * (pages, news, gallery, downloads, events, courses, contacts).
+ * Academic/ERP data (admissions processing, teachers, students,
+ * attendance, fees, exams) lives entirely in /ums/admin/ and never
+ * appears here.
+ */
+
 // ── KPI stats ──────────────────────────────────────────────
-$total_admissions = 0; $pending_count = 0;
-$adm_this_month = 0; $adm_last_month = 0;
+$active_pages = 0; $total_news = 0; $total_gallery = 0; $total_downloads = 0;
 $total_contacts = 0; $con_this_month = 0; $con_last_month = 0;
-$total_courses = 0; $total_teachers = 0;
-$recent_admissions = false; $recent_contacts = false; $recent_activity = false;
+$total_courses = 0; $upcoming_events = 0;
+$recent_contacts = false; $recent_activity = false; $recent_news = false; $recent_updates = [];
+
 try {
-    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM admissions"));
-    $total_admissions = (int)($r[0] ?? 0);
-    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM admissions WHERE status='pending'"));
-    $pending_count = (int)($r[0] ?? 0);
-    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM admissions WHERE YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())"));
-    $adm_this_month = (int)($r[0] ?? 0);
-    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM admissions WHERE created_at >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND created_at < DATE_FORMAT(NOW(), '%Y-%m-01')"));
-    $adm_last_month = (int)($r[0] ?? 0);
-    $recent_admissions = mysqli_query($conn, "SELECT * FROM admissions ORDER BY created_at DESC LIMIT 6");
+    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(DISTINCT page) FROM page_content"));
+    $active_pages = (int)($r[0] ?? 0);
+} catch (Exception $e) {}
+try {
+    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM news WHERE status='active'"));
+    $total_news = (int)($r[0] ?? 0);
+    $recent_news = mysqli_query($conn, "SELECT * FROM news ORDER BY created_at DESC LIMIT 5");
+} catch (Exception $e) {}
+try {
+    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM gallery WHERE status='active'"));
+    $total_gallery = (int)($r[0] ?? 0);
+} catch (Exception $e) {}
+try {
+    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM downloads WHERE status='active'"));
+    $total_downloads = (int)($r[0] ?? 0);
 } catch (Exception $e) {}
 try {
     $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM contacts"));
@@ -36,37 +50,33 @@ try {
     $total_courses = (int)($r[0] ?? 0);
 } catch (Exception $e) {}
 try {
-    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM teachers WHERE status='active'"));
-    $total_teachers = (int)($r[0] ?? 0);
+    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM events WHERE status='active' AND event_date >= CURDATE()"));
+    $upcoming_events = (int)($r[0] ?? 0);
 } catch (Exception $e) {}
 try {
     $recent_activity = mysqli_query($conn, "SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 8");
 } catch (Exception $e) {}
 
-// ── Chart data ─────────────────────────────────────────────
-$adm_daily = ms_daily_series($conn, 'admissions', 30);
+// ── Recent Website Updates — latest edit across every content type ──
+try {
+    $res = mysqli_query($conn, "
+        (SELECT 'Gallery' kind, 'fa-images' ic, title, created_at FROM gallery)
+        UNION ALL (SELECT 'News', 'fa-newspaper', title, created_at FROM news)
+        UNION ALL (SELECT 'Event', 'fa-calendar-days', title, created_at FROM events)
+        UNION ALL (SELECT 'Download', 'fa-file-arrow-down', title, created_at FROM downloads)
+        UNION ALL (SELECT 'Course', 'fa-book', name, created_at FROM courses)
+        ORDER BY created_at DESC LIMIT 8
+    ");
+    if ($res) while ($row = mysqli_fetch_assoc($res)) $recent_updates[] = $row;
+} catch (Exception $e) {}
+
+// ── Chart data — real, tracked website data only ────────────
 $con_daily = ms_daily_series($conn, 'contacts', 30);
-$trend_labels = array_map(fn($d) => date('M j', strtotime($d)), array_keys($adm_daily));
-$trend_series = [
-    ['label' => 'Admissions', 'class' => 'series-a', 'data' => array_values($adm_daily)],
-    ['label' => 'Contact Queries', 'class' => 'series-b', 'data' => array_values($con_daily)],
-];
-
-$adm_monthly = ms_months_series($conn, 'admissions');
-
-$statuses = ['pending' => 0, 'approved' => 0, 'rejected' => 0];
-try {
-    $res = mysqli_query($conn, "SELECT status, COUNT(*) c FROM admissions GROUP BY status");
-    while ($res && ($s = mysqli_fetch_assoc($res))) $statuses[$s['status']] = (int)$s['c'];
-} catch (Exception $e) {}
-
-$programs = [];
-try {
-    $res = mysqli_query($conn, "SELECT program, COUNT(*) c FROM admissions WHERE program != '' GROUP BY program ORDER BY c DESC LIMIT 7");
-    while ($res && ($p = mysqli_fetch_assoc($res))) $programs[$p['program']] = (int)$p['c'];
-} catch (Exception $e) {}
-
-$approval_rate = $total_admissions > 0 ? round($statuses['approved'] / $total_admissions * 100, 1) : 0;
+$dl_daily  = ms_daily_series($conn, 'downloads', 30);
+$trend_labels = array_map(fn($d) => date('M j', strtotime($d)), array_keys($con_daily));
+$con_series = [['label' => 'Contact Enquiries', 'class' => 'series-a', 'data' => array_values($con_daily)]];
+$dl_data = [];
+foreach ($dl_daily as $d => $c) $dl_data[date('M j', strtotime($d))] = $c;
 ?>
 
 <!-- Page Header -->
@@ -82,185 +92,186 @@ $approval_rate = $total_admissions > 0 ? round($statuses['approved'] / $total_ad
 
 <!-- ── Stat Cards ──────────────────────────────────────────── -->
 <div class="row g-3 mb-4">
-  <div class="col-6 col-xl">
+  <div class="col-6 col-xl-3">
     <div class="cardx stat-card">
       <div>
-        <p>Admissions This Month</p>
-        <h3><?= $adm_this_month ?><?= delta_html($adm_this_month, $adm_last_month) ?></h3>
-        <span class="stat-sub"><?= $total_admissions ?> all time</span>
+        <p>Active Pages</p>
+        <h3><?= $active_pages ?></h3>
+        <span class="stat-sub">editable website pages</span>
       </div>
-      <div class="stat-icon si-blue"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="stat-icon si-blue"><i class="fa-solid fa-file-lines"></i></div>
     </div>
   </div>
-  <div class="col-6 col-xl">
+  <div class="col-6 col-xl-3">
     <div class="cardx stat-card">
       <div>
-        <p>Pending Review</p>
-        <h3><?= $pending_count ?></h3>
-        <span class="stat-sub">awaiting a decision</span>
+        <p>News &amp; Announcements</p>
+        <h3><?= $total_news ?></h3>
+        <span class="stat-sub">published posts</span>
       </div>
-      <div class="stat-icon si-orange"><i class="fa-solid fa-clock"></i></div>
+      <div class="stat-icon si-purple"><i class="fa-solid fa-newspaper"></i></div>
     </div>
   </div>
-  <div class="col-6 col-xl">
+  <div class="col-6 col-xl-3">
     <div class="cardx stat-card">
       <div>
-        <p>Contacts This Month</p>
+        <p>Gallery Images</p>
+        <h3><?= $total_gallery ?></h3>
+        <span class="stat-sub">active photos</span>
+      </div>
+      <div class="stat-icon si-pink"><i class="fa-solid fa-images"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="cardx stat-card">
+      <div>
+        <p>Downloads</p>
+        <h3><?= $total_downloads ?></h3>
+        <span class="stat-sub">files available</span>
+      </div>
+      <div class="stat-icon si-teal"><i class="fa-solid fa-file-arrow-down"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="cardx stat-card">
+      <div>
+        <p>Contact Messages</p>
         <h3><?= $con_this_month ?><?= delta_html($con_this_month, $con_last_month) ?></h3>
         <span class="stat-sub"><?= $total_contacts ?> total received</span>
       </div>
       <div class="stat-icon si-red"><i class="fa-solid fa-envelope"></i></div>
     </div>
   </div>
-  <div class="col-6 col-xl">
+  <div class="col-6 col-xl-3">
     <div class="cardx stat-card">
       <div>
-        <p>Active Courses</p>
+        <p>Course Pages</p>
         <h3><?= $total_courses ?></h3>
-        <span class="stat-sub">open for admission</span>
+        <span class="stat-sub">on the website</span>
       </div>
       <div class="stat-icon si-green"><i class="fa-solid fa-book"></i></div>
     </div>
   </div>
-  <div class="col-6 col-xl">
+  <div class="col-6 col-xl-3">
     <div class="cardx stat-card">
       <div>
-        <p>Active Teachers</p>
-        <h3><?= $total_teachers ?></h3>
-        <span class="stat-sub">on faculty</span>
+        <p>Upcoming Events</p>
+        <h3><?= $upcoming_events ?></h3>
+        <span class="stat-sub">scheduled ahead</span>
       </div>
-      <div class="stat-icon si-purple"><i class="fa-solid fa-chalkboard-user"></i></div>
+      <div class="stat-icon si-orange"><i class="fa-solid fa-calendar-days"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="cardx stat-card">
+      <div>
+        <p>Website Visitors</p>
+        <h3>—</h3>
+        <span class="stat-sub">analytics not connected</span>
+      </div>
+      <div class="stat-icon si-cyan"><i class="fa-solid fa-chart-line"></i></div>
     </div>
   </div>
 </div>
 
-<!-- ── 30-day trend ────────────────────────────────────────── -->
+<!-- ── Contact enquiries trend ──────────────────────────────── -->
 <div class="cardx mb-3">
   <div class="section-hd">
-    <h2><i class="fa-solid fa-arrow-trend-up me-2 text-primary"></i>Admissions &amp; Contact Queries — Last 30 Days</h2>
+    <h2><i class="fa-solid fa-arrow-trend-up me-2 text-primary"></i>Contact Enquiries — Last 30 Days</h2>
     <a href="analytics.php" class="btn btn-sm btn-outline-primary">Full Analytics</a>
   </div>
-  <?= svg_line_chart($trend_series, $trend_labels, 'Daily admissions and contact queries over the last 30 days') ?>
+  <?= svg_line_chart($con_series, $trend_labels, 'Daily contact enquiries over the last 30 days') ?>
 </div>
 
-<!-- ── Monthly columns + pipeline donut ────────────────────── -->
+<!-- ── Downloads trend + Website analytics placeholder ─────── -->
 <div class="row g-3 mb-3">
   <div class="col-xl-8">
     <div class="cardx">
-      <div class="section-hd"><h2><i class="fa-solid fa-chart-column me-2 text-primary"></i>Admissions — Last 6 Months</h2></div>
-      <?= svg_columns($adm_monthly, 'Admission applications received per month over the last 6 months') ?>
+      <div class="section-hd"><h2><i class="fa-solid fa-file-arrow-down me-2 text-primary"></i>New Downloads Added — Last 30 Days</h2></div>
+      <?php if (array_sum($dl_data) > 0): ?>
+        <?= svg_columns($dl_data, 'New download files added per day over the last 30 days') ?>
+      <?php else: ?>
+        <div class="empty-state" style="padding:2rem">
+          <i class="fa-solid fa-file-arrow-down" style="font-size:1.75rem"></i>
+          <p class="small">No downloads added in the last 30 days.</p>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
   <div class="col-xl-4">
     <div class="cardx">
-      <div class="section-hd"><h2><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Application Pipeline</h2></div>
-      <?= svg_donut([
-          ['label' => 'Pending',  'value' => $statuses['pending'],  'class' => 'slice-1'],
-          ['label' => 'Approved', 'value' => $statuses['approved'], 'class' => 'slice-2'],
-          ['label' => 'Rejected', 'value' => $statuses['rejected'], 'class' => 'slice-4'],
-      ], 'Admission applications by status', 'Total') ?>
-      <?php if ($total_admissions > 0): ?>
-        <p class="text-muted small mt-3 mb-0">Approval rate: <strong class="text-navy"><?= $approval_rate ?>%</strong> of all applications.</p>
-      <?php endif; ?>
+      <div class="section-hd"><h2><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Website Analytics</h2></div>
+      <div class="empty-state" style="padding:1.5rem">
+        <i class="fa-solid fa-chart-simple" style="font-size:1.75rem"></i>
+        <p class="small">Visitor and top-page tracking isn't connected yet.<br>
+        Hook up an analytics provider to see visitor trends and your most-viewed pages here.</p>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ── Recent admissions + right rail ──────────────────────── -->
+<!-- ── Recent website updates + Quick Actions ──────────────── -->
 <div class="row g-3 mb-3">
   <div class="col-xl-8">
     <div class="cardx">
       <div class="section-hd">
-        <h2><i class="fa-solid fa-user-plus me-2 text-primary"></i>Recent Admissions</h2>
-        <a href="admissions.php" class="btn btn-sm btn-outline-primary">View All</a>
+        <h2><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Recent Website Updates</h2>
       </div>
-      <?php if ($recent_admissions && mysqli_num_rows($recent_admissions) > 0): ?>
-        <div class="table-wrap">
-          <table class="table align-middle">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Program</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php while ($row = mysqli_fetch_assoc($recent_admissions)): ?>
-                <tr>
-                  <td><strong><?= htmlspecialchars($row['student_name']) ?></strong></td>
-                  <td class="text-muted small"><?= htmlspecialchars($row['program']) ?></td>
-                  <td class="small"><?= htmlspecialchars($row['phone']) ?></td>
-                  <td>
-                    <span class="status-badge sb-<?= $row['status'] ?>">
-                      <?= ucfirst($row['status']) ?>
-                    </span>
-                  </td>
-                  <td class="text-muted small"><?= date('d M Y', strtotime($row['created_at'])) ?></td>
-                </tr>
-              <?php endwhile; ?>
-            </tbody>
-          </table>
+      <?php if ($recent_updates): ?>
+        <div class="feed">
+          <?php foreach ($recent_updates as $u): ?>
+            <div class="feed-item">
+              <span class="f-ico"><i class="fa-solid <?= htmlspecialchars($u['ic']) ?> text-primary" style="font-size:.75rem"></i></span>
+              <span>
+                <strong><?= htmlspecialchars($u['kind']) ?></strong> — <?= htmlspecialchars($u['title'] ?: 'Untitled') ?>
+                <small><?= date('d M Y, h:i A', strtotime($u['created_at'])) ?></small>
+              </span>
+            </div>
+          <?php endforeach; ?>
         </div>
       <?php else: ?>
         <div class="empty-state">
-          <i class="fa-solid fa-inbox"></i>
-          <p>No admission applications yet.<br>
-             <a href="../admissions.php" target="_blank">Share the admission form</a> to get started.</p>
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <p>No website content added yet.<br>Start by adding a gallery photo, news post, or event.</p>
         </div>
       <?php endif; ?>
     </div>
   </div>
 
-  <div class="col-xl-4 d-flex flex-column gap-3">
+  <div class="col-xl-4">
     <!-- Quick Actions -->
     <div class="cardx" style="height:auto">
       <div class="section-hd"><h2><i class="fa-solid fa-bolt me-2 text-warning"></i>Quick Actions</h2></div>
       <div class="d-grid gap-2">
-        <a href="admissions.php" class="btn btn-outline-primary btn-sm">
-          <i class="fa-solid fa-user-plus me-2"></i>Review Admissions
-          <?php if ($pending_count > 0): ?><span class="badge bg-danger ms-1"><?= $pending_count ?></span><?php endif; ?>
+        <a href="pages.php" class="btn btn-outline-primary btn-sm">
+          <i class="fa-solid fa-file-lines me-2"></i>Edit Website Pages
         </a>
-        <a href="courses.php" class="btn btn-outline-primary btn-sm">
-          <i class="fa-solid fa-book me-2"></i>Manage Courses
+        <a href="manage_news.php" class="btn btn-outline-primary btn-sm">
+          <i class="fa-solid fa-newspaper me-2"></i>Add News / Announcement
         </a>
-        <a href="teachers.php" class="btn btn-outline-primary btn-sm">
-          <i class="fa-solid fa-chalkboard-user me-2"></i>Manage Teachers
+        <a href="manage_gallery.php" class="btn btn-outline-primary btn-sm">
+          <i class="fa-solid fa-images me-2"></i>Upload Gallery Image
         </a>
-        <a href="contacts.php" class="btn btn-outline-primary btn-sm">
-          <i class="fa-solid fa-envelope me-2"></i>View Contact Queries
+        <a href="manage_downloads.php" class="btn btn-outline-primary btn-sm">
+          <i class="fa-solid fa-file-arrow-down me-2"></i>Upload Download
         </a>
-        <a href="settings.php" class="btn btn-outline-primary btn-sm">
-          <i class="fa-solid fa-gear me-2"></i>Site Settings
+        <a href="manage_events.php" class="btn btn-outline-primary btn-sm">
+          <i class="fa-solid fa-calendar-days me-2"></i>Create Event
         </a>
-        <a href="backup.php" class="btn btn-outline-primary btn-sm">
-          <i class="fa-solid fa-database me-2"></i>Download Backup
+        <a href="../index.php" target="_blank" class="btn btn-outline-primary btn-sm">
+          <i class="fa-solid fa-arrow-up-right-from-square me-2"></i>View Website
         </a>
       </div>
-    </div>
-
-    <!-- Top Programs -->
-    <div class="cardx" style="height:auto">
-      <div class="section-hd"><h2><i class="fa-solid fa-ranking-star me-2 text-primary"></i>Top Programs</h2></div>
-      <?php if (empty($programs)): ?>
-        <div class="empty-state" style="padding:1.5rem">
-          <i class="fa-solid fa-graduation-cap" style="font-size:1.75rem"></i>
-          <p class="small">No applications by program yet.</p>
-        </div>
-      <?php else: ?>
-        <?= svg_hbars($programs) ?>
-      <?php endif; ?>
     </div>
   </div>
 </div>
 
-<!-- ── Recent contacts + activity feed ─────────────────────── -->
+<!-- ── Recent contacts + recent news + activity feed ───────── -->
 <div class="row g-3">
-  <div class="col-xl-6">
+  <div class="col-xl-4">
     <div class="cardx">
       <div class="section-hd">
-        <h2><i class="fa-solid fa-comments me-2 text-primary"></i>Recent Contacts</h2>
+        <h2><i class="fa-solid fa-comments me-2 text-primary"></i>Recent Contact Messages</h2>
         <a href="contacts.php" class="btn btn-sm btn-outline-primary">View All</a>
       </div>
       <?php if ($recent_contacts && mysqli_num_rows($recent_contacts) > 0): ?>
@@ -289,7 +300,37 @@ $approval_rate = $total_admissions > 0 ? round($statuses['approved'] / $total_ad
     </div>
   </div>
 
-  <div class="col-xl-6">
+  <div class="col-xl-4">
+    <div class="cardx">
+      <div class="section-hd">
+        <h2><i class="fa-solid fa-newspaper me-2 text-primary"></i>Recent News</h2>
+        <a href="manage_news.php" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <?php if ($recent_news && mysqli_num_rows($recent_news) > 0): ?>
+        <?php while ($n = mysqli_fetch_assoc($recent_news)): ?>
+          <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
+            <div class="stat-icon si-purple" style="width:36px;height:36px;font-size:.85rem;flex-shrink:0">
+              <i class="fa-solid <?= $n['category'] === 'announcement' ? 'fa-bullhorn' : 'fa-newspaper' ?>"></i>
+            </div>
+            <div style="min-width:0">
+              <div class="fw-bold small text-truncate"><?= htmlspecialchars($n['title']) ?></div>
+              <div class="text-muted" style="font-size:.75rem"><?= ucfirst($n['category']) ?></div>
+            </div>
+            <div class="ms-auto text-muted" style="font-size:.7rem;white-space:nowrap">
+              <?= date('d M', strtotime($n['created_at'])) ?>
+            </div>
+          </div>
+        <?php endwhile; ?>
+      <?php else: ?>
+        <div class="empty-state" style="padding:1.5rem">
+          <i class="fa-solid fa-newspaper" style="font-size:1.75rem"></i>
+          <p class="small">No news or announcements yet.</p>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
     <div class="cardx">
       <div class="section-hd">
         <h2><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Recent Activity</h2>
@@ -310,7 +351,7 @@ $approval_rate = $total_admissions > 0 ? round($statuses['approved'] / $total_ad
       <?php else: ?>
         <div class="empty-state" style="padding:1.5rem">
           <i class="fa-solid fa-clock-rotate-left" style="font-size:1.75rem"></i>
-          <p class="small">No activity recorded yet. Actions like logins, settings changes, and backups will appear here.</p>
+          <p class="small">No activity recorded yet.</p>
         </div>
       <?php endif; ?>
     </div>
