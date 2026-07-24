@@ -7,7 +7,7 @@ require_once __DIR__ . '/charts.php';
 
 /*
  * Website CMS Dashboard — shows ONLY website content statistics
- * (pages, news, gallery, downloads, events, courses, contacts).
+ * (pages, news, gallery, downloads, events, contacts).
  * Academic/ERP data (admissions processing, teachers, students,
  * attendance, fees, exams) lives entirely in /ums/admin/ and never
  * appears here.
@@ -16,7 +16,7 @@ require_once __DIR__ . '/charts.php';
 // ── KPI stats ──────────────────────────────────────────────
 $active_pages = 0; $total_news = 0; $total_gallery = 0; $total_downloads = 0;
 $total_contacts = 0; $con_this_month = 0; $con_last_month = 0;
-$total_courses = 0; $upcoming_events = 0;
+$upcoming_events = 0;
 $recent_contacts = false; $recent_activity = false; $recent_news = false; $recent_updates = [];
 
 try {
@@ -46,10 +46,6 @@ try {
     $recent_contacts = mysqli_query($conn, "SELECT * FROM contacts ORDER BY created_at DESC LIMIT 5");
 } catch (Exception $e) {}
 try {
-    $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM courses WHERE status='active'"));
-    $total_courses = (int)($r[0] ?? 0);
-} catch (Exception $e) {}
-try {
     $r = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM events WHERE status='active' AND event_date >= CURDATE()"));
     $upcoming_events = (int)($r[0] ?? 0);
 } catch (Exception $e) {}
@@ -64,7 +60,6 @@ try {
         UNION ALL (SELECT 'News', 'fa-newspaper', title, created_at FROM news)
         UNION ALL (SELECT 'Event', 'fa-calendar-days', title, created_at FROM events)
         UNION ALL (SELECT 'Download', 'fa-file-arrow-down', title, created_at FROM downloads)
-        UNION ALL (SELECT 'Course', 'fa-book', name, created_at FROM courses)
         ORDER BY created_at DESC LIMIT 8
     ");
     if ($res) while ($row = mysqli_fetch_assoc($res)) $recent_updates[] = $row;
@@ -140,16 +135,6 @@ foreach ($dl_daily as $d => $c) $dl_data[date('M j', strtotime($d))] = $c;
         <span class="stat-sub"><?= $total_contacts ?> total received</span>
       </div>
       <div class="stat-icon si-red"><i class="fa-solid fa-envelope"></i></div>
-    </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="cardx stat-card">
-      <div>
-        <p>Course Pages</p>
-        <h3><?= $total_courses ?></h3>
-        <span class="stat-sub">on the website</span>
-      </div>
-      <div class="stat-icon si-green"><i class="fa-solid fa-book"></i></div>
     </div>
   </div>
   <div class="col-6 col-xl-3">
