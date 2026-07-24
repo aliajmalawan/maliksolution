@@ -50,7 +50,7 @@ $depts = dept_options((int)$user['campus_id']);
         <select name="status"><?php foreach (STU_STATUS as $k=>$m): ?><option value="<?= $k ?>" <?= ($s['status']??'active')===$k?'selected':'' ?>><?= e($m[0]) ?></option><?php endforeach; ?></select></div>
     </div>
     <div class="u-form-actions">
-      <a href="<?= $isEdit ? stu_url('view.php?id='.(int)$s['id']) : stu_url('index.php') ?>" class="u-btn u-btn-soft">Cancel</a>
+      <a href="<?= stu_url('index.php') ?>" class="u-btn u-btn-soft">Cancel</a>
       <button type="submit" class="u-btn u-btn-primary"><i class="fa-solid fa-floppy-disk"></i> <?= $isEdit ? 'Save Changes' : 'Enroll Student' ?></button>
     </div>
   </div>

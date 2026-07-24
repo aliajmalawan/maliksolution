@@ -66,15 +66,13 @@ const STU_STATUS = [
     'dropped'   => ['Dropped', 'st-rejected'],
 ];
 
-function stu_find(int $id): ?array
-{
-    $stmt = ums_db()->prepare('SELECT * FROM ' . tbl('students') . ' WHERE id = ? LIMIT 1');
-    $stmt->bind_param('i', $id); $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc(); $stmt->close();
-    return $row ?: null;
-}
+// stu_find() now lives in includes/crud.php — shared with the Student Portal.
 
 function stu_url(string $path = ''): string
 {
     return UMS_URL . '/modules/students/' . $path;
 }
+
+// stu_gen_password(), stu_create_login(), stu_login_find(), stu_reset_password()
+// now live in includes/crud.php — shared with the Admissions module, which
+// also needs to manage a student's login once an application is enrolled.

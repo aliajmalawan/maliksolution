@@ -24,7 +24,7 @@ function ums_attempt_login(string $email, string $password, array $allowedRoles 
     }
 
     $stmt = ums_db()->prepare(
-        'SELECT id, campus_id, name, email, password_hash, role, status FROM ' . tbl('users') . ' WHERE email = ? LIMIT 1'
+        'SELECT id, campus_id, student_id, teacher_id, name, email, password_hash, role, status FROM ' . tbl('users') . ' WHERE email = ? LIMIT 1'
     );
     $stmt->bind_param('s', $email);
     $stmt->execute();
@@ -66,20 +66,23 @@ function ums_establish_session(array $user): void
     session_regenerate_id(true);
     unset($_SESSION['ums_login_fails']);
     $_SESSION['ums_user'] = [
-        'id'        => (int)$user['id'],
-        'campus_id' => (int)$user['campus_id'],
-        'name'      => $user['name'],
-        'email'     => $user['email'],
-        'role'      => $user['role'],
+        'id'         => (int)$user['id'],
+        'campus_id'  => (int)$user['campus_id'],
+        'student_id' => isset($user['student_id']) && $user['student_id'] !== null ? (int)$user['student_id'] : null,
+        'teacher_id' => isset($user['teacher_id']) && $user['teacher_id'] !== null ? (int)$user['teacher_id'] : null,
+        'name'       => $user['name'],
+        'email'      => $user['email'],
+        'role'       => $user['role'],
     ];
 }
 
 /** The correct landing page for a given role after login. */
 function ums_role_home(string $role): string
 {
-    return in_array($role, UMS_ADMIN_ROLES, true)
-        ? UMS_URL . '/admin/dashboard.php'
-        : UMS_URL . '/admin/dashboard.php'; // teacher/student portals arrive in a later phase
+    if (in_array($role, UMS_ADMIN_ROLES, true)) return UMS_URL . '/admin/dashboard.php';
+    if ($role === 'teacher') return UMS_URL . '/teacher/portal.php';
+    if ($role === 'student') return UMS_URL . '/student/portal.php';
+    return UMS_URL . '/admin/dashboard.php';
 }
 
 /* ─────────────────────────── Remember me ─────────────────────────── */
@@ -123,7 +126,7 @@ function ums_remember_login(): void
 
     try {
         $stmt = ums_db()->prepare(
-            'SELECT t.id, t.validator_hash, t.expires_at, u.id uid, u.campus_id, u.name, u.email, u.role, u.status
+            'SELECT t.id, t.validator_hash, t.expires_at, u.id uid, u.campus_id, u.student_id, u.teacher_id, u.name, u.email, u.role, u.status
              FROM ' . tbl('remember_tokens') . ' t
              JOIN ' . tbl('users') . ' u ON u.id = t.user_id
              WHERE t.selector = ? LIMIT 1'
@@ -146,8 +149,8 @@ function ums_remember_login(): void
     }
 
     ums_establish_session([
-        'id' => $row['uid'], 'campus_id' => $row['campus_id'], 'name' => $row['name'],
-        'email' => $row['email'], 'role' => $row['role'],
+        'id' => $row['uid'], 'campus_id' => $row['campus_id'], 'student_id' => $row['student_id'], 'teacher_id' => $row['teacher_id'],
+        'name' => $row['name'], 'email' => $row['email'], 'role' => $row['role'],
     ]);
     ums_log('login_remember', 'Auto sign-in via remember-me');
 }
@@ -218,6 +221,8 @@ function require_login(array $roles = []): void
 {
     $user = ums_user();
     if (!$user) {
+        if ($roles === ['teacher']) redirect(UMS_URL . '/teacher/login.php');
+        if ($roles === ['student']) redirect(UMS_URL . '/student/login.php');
         redirect(UMS_URL . '/admin/login.php');
     }
     if ($roles && !in_array($user['role'], $roles, true)) {

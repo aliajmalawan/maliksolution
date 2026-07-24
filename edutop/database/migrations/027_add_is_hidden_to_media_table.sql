@@ -1,0 +1,2 @@
+ALTER TABLE media
+    ADD COLUMN is_hidden TINYINT(1) NOT NULL DEFAULT 0 AFTER alt_text;

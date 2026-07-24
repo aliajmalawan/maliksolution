@@ -1,0 +1,6 @@
+Options -Indexes -ExecCGI
+AddHandler default-handler .php .php3 .php4 .php5 .php7 .phtml .pht
+
+<FilesMatch "\.(php|php3|php4|php5|php7|phtml|pht|phar|cgi|pl|py|exe)$">
+    Require all denied
+</FilesMatch>

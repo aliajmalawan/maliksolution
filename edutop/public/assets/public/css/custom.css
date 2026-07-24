@@ -1,0 +1,2027 @@
+/* ==========================================================================
+   EduTop public site design system — built on top of Bootstrap 5.
+   Color tokens (--edu-*) come from Settings > Theme (see layouts/main.php);
+   everything here reads those variables rather than hardcoding hex values.
+   ========================================================================== */
+
+:root {
+    --edu-radius: 20px;         /* cards */
+    --edu-radius-sm: 14px;      /* buttons */
+    --edu-radius-input: 12px;   /* inputs */
+    --edu-radius-img: 24px;     /* images */
+    --edu-shadow-sm: 0 8px 30px rgba(var(--edu-primary-rgb), 0.08);
+    --edu-shadow-md: 0 12px 38px rgba(var(--edu-primary-rgb), 0.11);
+    --edu-shadow-lg: 0 20px 50px rgba(var(--edu-primary-rgb), 0.15);
+    --edu-shadow-btn: 0 10px 25px rgba(var(--edu-primary-rgb), 0.18);
+    --edu-border: #E5E7EB;
+    --edu-font-heading: 'Poppins', system-ui, sans-serif;
+    --edu-font-body: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    font-family: var(--edu-font-body);
+    /* clip (not hidden): stops sideways scroll from decorative glows without
+       creating a scroll container, which would break position: sticky. */
+    overflow-x: clip;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--edu-font-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* ---- Section rhythm ---- */
+.edu-section {
+    padding: 4.25rem 0;
+}
+
+@media (max-width: 767.98px) {
+    .edu-section {
+        padding: 2.75rem 0;
+    }
+}
+
+.edu-eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--edu-primary);
+    background: rgba(var(--edu-primary-rgb), 0.08);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+}
+
+/* ---- Heading divider ---- */
+.edu-heading-divider {
+    width: 56px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--edu-primary), var(--edu-secondary));
+    margin-top: 1.1rem;
+}
+
+/* ---- Cards ---- */
+.edu-card {
+    background: var(--edu-card);
+    border-radius: var(--edu-radius);
+    border: 1px solid var(--edu-border);
+    box-shadow: var(--edu-shadow-sm);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    height: 100%;
+}
+
+.edu-card.hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--edu-shadow-lg);
+    border-color: var(--edu-secondary);
+}
+
+/* ---- Image-only photo gallery: masonry grid, natural (uncropped) proportions ---- */
+.edu-masonry-grid {
+    column-count: 4;
+    column-gap: 1rem;
+}
+
+@media (max-width: 991.98px) {
+    .edu-masonry-grid { column-count: 3; }
+}
+
+@media (max-width: 767.98px) {
+    .edu-masonry-grid { column-count: 2; }
+}
+
+@media (max-width: 479.98px) {
+    .edu-masonry-grid { column-count: 1; }
+}
+
+.edu-masonry-grid .edu-gallery-item {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1rem;
+    break-inside: avoid;
+}
+
+.edu-photo-tile {
+    display: block;
+    border-radius: var(--edu-radius-sm);
+    box-shadow: var(--edu-shadow-sm);
+    overflow: hidden;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.edu-photo-tile img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.edu-photo-tile.hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--edu-shadow-lg);
+}
+
+.edu-photo-tile.hover-lift:hover img {
+    transform: scale(1.06);
+}
+
+.edu-gallery-filter-btn {
+    border: 1px solid var(--edu-border);
+    background: var(--edu-card);
+    color: var(--edu-text);
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.45rem 1.15rem;
+    border-radius: 999px;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.edu-gallery-filter-btn:hover {
+    border-color: var(--edu-primary);
+    color: var(--edu-primary);
+}
+
+.edu-gallery-filter-btn.active {
+    background: var(--edu-primary);
+    border-color: var(--edu-primary);
+    color: #fff;
+}
+
+/* Lightbox: clicking a photo tile opens it full-size in a Bootstrap modal. */
+.edu-lightbox-modal .modal-content {
+    background: transparent;
+    border: 0;
+}
+
+.edu-lightbox-img {
+    display: block;
+    max-width: 100%;
+    max-height: 85vh;
+    margin: 0 auto;
+    border-radius: var(--edu-radius-sm);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.edu-lightbox-close {
+    position: absolute;
+    top: -2.5rem;
+    right: 0;
+    opacity: 0.9;
+}
+
+/* Fixed to the viewport edges (not the image box) so they stay put at a
+   consistent spot regardless of how tall/wide the current photo is. */
+.edu-lightbox-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1056;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font-size: 1.3rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.edu-lightbox-nav:hover {
+    background: var(--edu-primary);
+    color: #fff;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.edu-lightbox-prev {
+    left: 1rem;
+}
+
+.edu-lightbox-next {
+    right: 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .edu-lightbox-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .edu-lightbox-prev { left: 0.4rem; }
+    .edu-lightbox-next { right: 0.4rem; }
+}
+
+/* ---- Academic programs journey ---- */
+.edu-programs-section {
+    background:
+        radial-gradient(800px 360px at 100% 0%, rgba(var(--edu-secondary-rgb), 0.07), transparent 55%),
+        radial-gradient(700px 340px at 0% 100%, rgba(var(--edu-primary-rgb), 0.05), transparent 55%),
+        var(--edu-surface);
+}
+
+.edu-journey {
+    display: grid;
+    grid-template-columns: repeat(var(--edu-journey-cols, 4), 1fr);
+    gap: 1.5rem;
+    position: relative;
+    padding-top: 2.5rem;
+}
+
+/* connecting line across the nodes (desktop) */
+.edu-journey::before {
+    content: "";
+    position: absolute;
+    top: 3.4rem;
+    left: 8%;
+    right: 8%;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--edu-primary), var(--edu-secondary), var(--edu-primary));
+    opacity: 0.35;
+}
+
+.edu-journey-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.edu-journey-node {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-accent));
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 6px rgba(var(--edu-primary-rgb), 0.12), var(--edu-shadow-btn);
+    position: relative;
+    z-index: 1;
+    margin-bottom: -29px;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.edu-journey-number {
+    font-family: var(--edu-font-heading);
+    font-weight: 800;
+    font-size: 1.25rem;
+}
+
+.edu-journey-card {
+    background: var(--edu-card);
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius);
+    box-shadow: var(--edu-shadow-sm);
+    padding: 3rem 1.4rem 1.8rem;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.edu-journey-step:hover .edu-journey-card {
+    transform: translateY(-8px);
+    box-shadow: var(--edu-shadow-lg);
+    border-color: var(--edu-secondary);
+}
+
+.edu-journey-step:hover .edu-journey-node {
+    transform: scale(1.12);
+    background: linear-gradient(135deg, var(--edu-secondary), var(--edu-secondary-dark));
+    color: var(--edu-primary);
+}
+
+.edu-journey-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.6rem;
+}
+
+.edu-journey-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--edu-primary);
+    background: rgba(var(--edu-primary-rgb), 0.08);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Tablet: 2-up grid, no connecting line */
+@media (max-width: 991.98px) {
+    .edu-journey {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .edu-journey::before {
+        display: none;
+    }
+}
+
+/* Mobile: vertical timeline down the left edge */
+@media (max-width: 575.98px) {
+    .edu-journey {
+        grid-template-columns: 1fr;
+        padding-top: 0;
+        padding-left: 3.4rem;
+    }
+
+    .edu-journey::before {
+        display: block;
+        top: 1rem;
+        bottom: 1rem;
+        left: 1.3rem;
+        right: auto;
+        width: 3px;
+        height: auto;
+        opacity: 0.5;
+        background: linear-gradient(180deg, var(--edu-primary), var(--edu-secondary));
+    }
+
+    .edu-journey-step {
+        display: block;
+        text-align: left;
+        position: relative;
+    }
+
+    .edu-journey-node {
+        position: absolute;
+        left: -3.4rem;
+        top: 0.9rem;
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        box-shadow: 0 0 0 5px var(--edu-bg);
+    }
+
+    .edu-journey-number {
+        font-size: 1rem;
+    }
+
+    .edu-journey-card {
+        padding: 1.4rem;
+    }
+}
+
+/* ---- Feature list (icon grid, card-free) ---- */
+.edu-feature-item {
+    padding: 0.5rem 0;
+}
+
+.edu-feature-icon {
+    width: 60px;
+    height: 60px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--edu-radius-sm);
+    background: linear-gradient(135deg, rgba(var(--edu-primary-rgb), 0.10), rgba(var(--edu-secondary-rgb), 0.14));
+    border: 1px solid rgba(var(--edu-primary-rgb), 0.10);
+    font-size: 1.6rem;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edu-feature-item:hover .edu-feature-icon {
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-accent));
+    box-shadow: var(--edu-shadow-btn);
+    transform: translateY(-3px) scale(1.05);
+}
+
+.edu-feature-item h5 {
+    transition: color 0.25s ease;
+}
+
+.edu-feature-item:hover h5 {
+    color: var(--edu-primary);
+}
+
+@media (max-width: 575.98px) {
+    .edu-feature-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem !important;
+    }
+}
+
+/* ---- Icon badge ---- */
+.edu-icon-badge {
+    width: 62px;
+    height: 62px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--edu-radius-sm);
+    background: rgba(var(--edu-primary-rgb), 0.09);
+    color: var(--edu-primary);
+    font-size: 1.65rem;
+    margin-bottom: 1.1rem;
+    transition: transform 0.35s ease, background-color 0.35s ease, color 0.35s ease;
+}
+
+.edu-card.hover-lift:hover .edu-icon-badge {
+    background: var(--edu-secondary);
+    color: var(--edu-primary);
+    transform: scale(1.08) rotate(-4deg);
+}
+
+/* ---- Buttons ---- */
+.btn {
+    border-radius: var(--edu-radius-sm);
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-lg {
+    padding: 0.85rem 2.1rem;
+}
+
+.btn-primary,
+.btn-secondary {
+    box-shadow: var(--edu-shadow-btn);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ---- Inputs ---- */
+.form-control,
+.form-select {
+    border-radius: var(--edu-radius-input);
+    border-color: var(--edu-border);
+    padding: 0.6rem 0.9rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--edu-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--edu-primary-rgb), 0.12);
+}
+
+/* ---- Images ---- */
+.rounded-4 {
+    border-radius: var(--edu-radius-img) !important;
+}
+
+/* ---- Page header band ---- */
+.edu-page-header {
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 0 6rem;
+    background:
+        radial-gradient(800px 360px at 85% -10%, rgba(var(--edu-secondary-rgb), 0.18), transparent 55%),
+        radial-gradient(600px 300px at 5% 110%, rgba(255, 255, 255, 0.07), transparent 55%),
+        linear-gradient(120deg, var(--edu-primary-dark), var(--edu-primary) 55%, var(--edu-accent));
+}
+
+.edu-page-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.6), transparent 75%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.6), transparent 75%);
+    pointer-events: none;
+}
+
+.edu-page-header-title {
+    font-size: clamp(2rem, 4.5vw, 3.1rem);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}
+
+.edu-page-header-sub {
+    color: #D6D9F5;
+    font-size: 1.08rem;
+    line-height: 1.75;
+    max-width: 38rem;
+    margin-bottom: 0;
+}
+
+.edu-breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 0.4rem 1.1rem;
+    margin-bottom: 1.4rem;
+    backdrop-filter: blur(4px);
+}
+
+.edu-breadcrumb a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+}
+
+.edu-breadcrumb a:hover {
+    color: var(--edu-secondary);
+}
+
+.edu-breadcrumb-sep {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.7rem;
+}
+
+.edu-breadcrumb-current {
+    color: var(--edu-secondary);
+}
+
+@media (max-width: 767.98px) {
+    .edu-page-header {
+        padding: 2.5rem 0 4.5rem;
+    }
+
+    /* Long page titles: keep the breadcrumb pill inside the screen */
+    .edu-breadcrumb {
+        max-width: 100%;
+        flex-wrap: nowrap;
+    }
+
+    .edu-breadcrumb-current {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 55vw;
+    }
+}
+
+/* ---- Hero slider ---- */
+.edu-slider {
+    position: relative;
+    color: #fff;
+}
+
+.edu-slide {
+    min-height: 78vh;
+    display: flex;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--edu-primary);
+    position: relative;
+    padding: 5rem 0 7rem;
+}
+
+.edu-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(1000px 500px at 85% 0%, rgba(var(--edu-secondary-rgb), 0.18), transparent 55%),
+        linear-gradient(100deg, rgba(20, 12, 60, 0.88) 0%, rgba(var(--edu-primary-rgb), 0.72) 45%, rgba(var(--edu-primary-rgb), 0.35) 100%);
+}
+
+.edu-slide-content {
+    position: relative;
+    max-width: 640px;
+    padding: 1rem 0;
+}
+
+.edu-slide-eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--edu-secondary);
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(var(--edu-secondary-rgb), 0.35);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+    backdrop-filter: blur(4px);
+}
+
+.edu-slide-heading {
+    font-size: clamp(2.1rem, 5vw, 3.6rem);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.25);
+}
+
+.edu-slide-sub {
+    font-size: 1.12rem;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.75;
+    margin-bottom: 1.75rem;
+}
+
+/* Slide content animates in when its slide becomes active */
+.carousel-item .edu-slide-eyebrow,
+.carousel-item .edu-slide-heading,
+.carousel-item .edu-slide-sub,
+.carousel-item .edu-slide-content .d-flex {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carousel-item.active .edu-slide-eyebrow { opacity: 1; transform: none; transition-delay: 0.25s; }
+.carousel-item.active .edu-slide-heading { opacity: 1; transform: none; transition-delay: 0.40s; }
+.carousel-item.active .edu-slide-sub { opacity: 1; transform: none; transition-delay: 0.55s; }
+.carousel-item.active .edu-slide-content .d-flex { opacity: 1; transform: none; transition-delay: 0.70s; }
+
+.edu-slider-arrow {
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 1.4rem;
+    backdrop-filter: blur(4px);
+    transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.carousel-control-prev:hover .edu-slider-arrow,
+.carousel-control-next:hover .edu-slider-arrow {
+    background: var(--edu-secondary);
+    color: var(--edu-primary);
+    transform: scale(1.08);
+}
+
+.edu-slider .carousel-control-prev,
+.edu-slider .carousel-control-next {
+    width: 8%;
+    z-index: 3;
+}
+
+.edu-slider .carousel-indicators {
+    z-index: 4;
+    margin-bottom: 2.6rem;
+}
+
+.edu-slider .carousel-indicators button {
+    width: 34px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.45);
+    border: 0;
+    transition: background-color 0.3s ease, width 0.3s ease;
+}
+
+.edu-slider .carousel-indicators button.active {
+    background: var(--edu-secondary);
+    width: 52px;
+}
+
+/* Wave divider bleeding into the page background */
+.edu-wave {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    color: var(--edu-bg);
+    line-height: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.edu-wave svg {
+    width: 100%;
+    height: 70px;
+    display: block;
+}
+
+@media (max-width: 767.98px) {
+    .edu-slide {
+        min-height: 70vh;
+        padding: 3.5rem 0 6rem;
+    }
+
+    .edu-slider .carousel-control-prev,
+    .edu-slider .carousel-control-next {
+        display: none;
+    }
+
+    .edu-wave svg {
+        height: 40px;
+    }
+}
+
+/* ---- Hero ---- */
+.edu-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2.25rem 0 4rem;
+    background:
+        radial-gradient(1100px 520px at 12% -15%, rgba(var(--edu-primary-rgb), 0.14), transparent 55%),
+        radial-gradient(800px 420px at 100% 115%, rgba(var(--edu-primary-rgb), 0.10), transparent 55%),
+        linear-gradient(135deg, rgba(var(--edu-primary-rgb), 0.07) 0%, #F8F7FF 45%, #FFF8E6 100%);
+}
+
+@media (min-width: 992px) {
+    .edu-hero {
+        padding: 3rem 0 5.5rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .edu-hero {
+        padding: 1.5rem 0 2.75rem;
+    }
+
+    .edu-hero h1 {
+        font-size: 2.1rem;
+    }
+}
+
+.edu-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(var(--edu-primary-rgb), 0.14) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.5), transparent 70%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.5), transparent 70%);
+    pointer-events: none;
+}
+
+/* ---- Hero media (image + floating badges) ---- */
+.edu-hero-media {
+    position: relative;
+    padding: 0 0.5rem;
+}
+
+.edu-hero-media::before {
+    content: "";
+    position: absolute;
+    inset: 8%;
+    border-radius: var(--edu-radius-img);
+    background: linear-gradient(135deg, rgba(var(--edu-secondary-rgb), 0.35), rgba(var(--edu-primary-rgb), 0.25));
+    transform: rotate(-4deg);
+    z-index: 0;
+}
+
+.edu-hero-media img {
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--edu-shadow-lg);
+    width: 100%;
+}
+
+.edu-hero-badge {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--edu-card);
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius-sm);
+    box-shadow: var(--edu-shadow-md);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.82rem;
+    line-height: 1.25;
+    color: var(--edu-heading);
+    animation: edu-float 5s ease-in-out infinite;
+}
+
+.edu-hero-badge small {
+    color: var(--edu-text);
+}
+
+.edu-hero-badge-icon {
+    font-size: 1.4rem;
+}
+
+.edu-hero-badge-top {
+    top: 6%;
+    left: -1rem;
+}
+
+.edu-hero-badge-bottom {
+    bottom: 6%;
+    right: -0.5rem;
+    animation-delay: 2.5s;
+}
+
+@keyframes edu-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 991.98px) {
+    .edu-hero-badge-top { left: 0; }
+    .edu-hero-badge-bottom { right: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .edu-hero-badge { animation: none; }
+}
+
+/* ---- Stats (dark gradient band with glass cards) ---- */
+.edu-stats-section {
+    background:
+        radial-gradient(900px 400px at 88% -20%, rgba(var(--edu-secondary-rgb), 0.20), transparent 55%),
+        radial-gradient(700px 380px at 0% 120%, rgba(255, 255, 255, 0.07), transparent 55%),
+        linear-gradient(120deg, var(--edu-primary-dark), var(--edu-primary) 55%, var(--edu-accent));
+    position: relative;
+    overflow: hidden;
+}
+
+.edu-stats-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.55), transparent 80%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.55), transparent 80%);
+    pointer-events: none;
+}
+
+.edu-stats-section h2 {
+    color: #fff;
+}
+
+.edu-stats-section .edu-eyebrow {
+    color: var(--edu-secondary);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.edu-stats-section .edu-heading-divider {
+    background: var(--edu-secondary);
+}
+
+.edu-stat-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--edu-radius);
+    padding: 1.9rem 1rem;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edu-stat-card:hover {
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(var(--edu-secondary-rgb), 0.6);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+}
+
+.edu-stat-number {
+    font-family: var(--edu-font-heading);
+    font-size: clamp(2rem, 4.5vw, 2.9rem);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--edu-secondary);
+}
+
+.edu-stat-label {
+    color: #D6D9F5;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* ---- CTA banner ---- */
+.edu-cta-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--edu-radius-img);
+    padding: 4rem 1.5rem;
+    background:
+        radial-gradient(700px 300px at 90% -20%, rgba(var(--edu-secondary-rgb), 0.22), transparent 55%),
+        radial-gradient(500px 260px at 0% 120%, rgba(255, 255, 255, 0.08), transparent 55%),
+        linear-gradient(135deg, var(--edu-primary-dark), var(--edu-primary) 45%, var(--edu-accent));
+    box-shadow: var(--edu-shadow-lg);
+}
+
+.edu-cta-banner::before,
+.edu-cta-banner::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.10);
+    pointer-events: none;
+}
+
+.edu-cta-banner::before {
+    width: 220px;
+    height: 220px;
+    top: -80px;
+    left: -60px;
+}
+
+.edu-cta-banner::after {
+    width: 300px;
+    height: 300px;
+    bottom: -140px;
+    right: -80px;
+    border-color: rgba(var(--edu-secondary-rgb), 0.25);
+}
+
+@media (max-width: 767.98px) {
+    .edu-cta-banner {
+        padding: 2.5rem 1.25rem;
+        border-radius: var(--edu-radius);
+    }
+}
+
+.edu-cta-banner {
+    text-align: initial;
+}
+
+.edu-cta-trust li {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.edu-cta-trust i {
+    color: var(--edu-secondary);
+}
+
+/* Contact quick-card inside the CTA */
+.edu-cta-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--edu-radius);
+    padding: 1.5rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.edu-cta-card-title {
+    font-family: var(--edu-font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+    margin-bottom: 1.1rem;
+}
+
+.edu-cta-contact {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: var(--edu-radius-sm);
+    text-decoration: none;
+    color: #fff;
+    transition: background-color 0.25s ease, transform 0.25s ease;
+    margin-bottom: 0.35rem;
+}
+
+a.edu-cta-contact:hover {
+    background: rgba(255, 255, 255, 0.10);
+    transform: translateX(4px);
+    color: #fff;
+}
+
+.edu-cta-contact small {
+    display: block;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.edu-cta-contact strong {
+    font-size: 0.95rem;
+}
+
+.edu-cta-contact-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(var(--edu-secondary-rgb), 0.20);
+    color: var(--edu-secondary);
+    font-size: 1.1rem;
+}
+
+/* ---- Contact split card (info panel + form) ---- */
+.edu-contact-wrap {
+    background: var(--edu-card);
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius);
+    box-shadow: var(--edu-shadow-md);
+    overflow: hidden;
+}
+
+.edu-contact-info {
+    position: relative;
+    overflow: hidden;
+    padding: 2.25rem 1.75rem;
+    background:
+        radial-gradient(500px 260px at 90% -10%, rgba(var(--edu-secondary-rgb), 0.20), transparent 55%),
+        linear-gradient(150deg, var(--edu-primary-dark), var(--edu-primary) 60%, var(--edu-accent));
+}
+
+.edu-contact-info::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.10);
+    bottom: -90px;
+    right: -70px;
+    pointer-events: none;
+}
+
+.edu-contact-form {
+    padding: 2.25rem 1.75rem;
+}
+
+@media (min-width: 992px) {
+    .edu-contact-info {
+        padding: 2.75rem 2.25rem;
+    }
+
+    .edu-contact-form {
+        padding: 2.75rem 2.5rem;
+    }
+}
+
+.edu-contact-form .form-label {
+    font-size: 0.88rem;
+    color: var(--edu-heading);
+    margin-bottom: 0.35rem;
+}
+
+/* ---- Admission form ---- */
+.edu-admission-form {
+    max-width: 860px;
+}
+
+.edu-form-block {
+    background: var(--edu-card);
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius);
+    box-shadow: var(--edu-shadow-sm);
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .edu-form-block {
+        padding: 2rem 2.25rem;
+    }
+}
+
+.edu-form-block-title {
+    font-family: var(--edu-font-heading);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--edu-heading);
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.4rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--edu-border);
+}
+
+.edu-form-step {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-accent));
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Pulsing ring on the main CTA button */
+.edu-btn-pulse {
+    position: relative;
+}
+
+.edu-btn-pulse::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 2px solid rgba(var(--edu-secondary-rgb), 0.7);
+    animation: edu-pulse 2.2s ease-out infinite;
+    pointer-events: none;
+}
+
+@keyframes edu-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    70%, 100% { transform: scale(1.14); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .edu-btn-pulse::after {
+        animation: none;
+        display: none;
+    }
+}
+
+/* ---- Testimonials slider ---- */
+.edu-tslider {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.edu-tslide {
+    background: var(--edu-card);
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius);
+    box-shadow: var(--edu-shadow-md);
+    padding: 3rem 2rem 2.25rem;
+    max-width: 720px;
+    position: relative;
+}
+
+.edu-tslide-quote {
+    position: absolute;
+    top: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-accent));
+    color: var(--edu-secondary);
+    font-size: 1.6rem;
+    box-shadow: var(--edu-shadow-btn);
+}
+
+.edu-tslide-text {
+    font-style: italic;
+    font-size: 1.08rem;
+    line-height: 1.85;
+    color: var(--edu-text);
+    max-width: 560px;
+    margin: 0 auto 1.5rem;
+}
+
+.edu-tslider .carousel-inner {
+    padding: 2rem 0.5rem 0.75rem; /* room for the floating quote badge + shadow */
+}
+
+.edu-tslider-multi .carousel-inner {
+    padding: 0.5rem 0.25rem 0.75rem; /* room for card shadows */
+}
+
+.edu-tslider-multi .edu-testimonial-card {
+    box-shadow: var(--edu-shadow-sm);
+}
+
+.edu-tslider-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.edu-tslider-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--edu-border);
+    background: var(--edu-card);
+    color: var(--edu-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: var(--edu-shadow-sm);
+    transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.edu-tslider-btn:hover {
+    background: var(--edu-primary);
+    color: #fff;
+    transform: scale(1.08);
+}
+
+.edu-tslider-dots {
+    position: static;
+    margin: 0;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.edu-tslider-dots button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(var(--edu-primary-rgb), 0.25);
+    transition: background-color 0.3s ease, width 0.3s ease, border-radius 0.3s ease;
+}
+
+.edu-tslider-dots button.active {
+    background: var(--edu-primary);
+    width: 26px;
+    border-radius: 999px;
+}
+
+@media (max-width: 575.98px) {
+    .edu-tslide {
+        padding: 2.5rem 1.25rem 1.75rem;
+    }
+}
+
+/* ---- Testimonials ---- */
+.edu-testimonial-quote {
+    font-size: 2.4rem;
+    line-height: 1;
+    color: rgba(var(--edu-primary-rgb), 0.25);
+}
+
+.edu-testimonial-stars {
+    color: var(--edu-secondary);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+}
+
+.edu-testimonial-text {
+    color: var(--edu-text);
+    font-style: italic;
+    line-height: 1.8;
+}
+
+.edu-testimonial-card {
+    border-top: 4px solid transparent;
+}
+
+.edu-testimonial-card:hover {
+    border-top-color: var(--edu-secondary);
+}
+
+.edu-avatar-initial {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-accent));
+}
+
+.edu-avatar-ring {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-secondary));
+}
+
+.edu-avatar-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 2px solid var(--edu-card);
+}
+
+/* ---- FAQ accordion ---- */
+.edu-faq-accordion .accordion-item {
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius-sm) !important;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.edu-faq-accordion .accordion-button {
+    font-weight: 600;
+    color: var(--edu-heading);
+}
+
+.edu-faq-accordion .accordion-button:not(.collapsed) {
+    background: rgba(var(--edu-primary-rgb), 0.06);
+    color: var(--edu-primary);
+    box-shadow: none;
+}
+
+.edu-faq-accordion .accordion-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--edu-primary-rgb), 0.15);
+}
+
+/* ---- Gallery ---- */
+.edu-card.hover-lift:hover img {
+    transform: scale(1.06);
+}
+
+/* ---- Client logos ---- */
+.edu-client-logo {
+    opacity: 0.7;
+    filter: grayscale(1);
+    transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+}
+
+.edu-client-logo:hover {
+    opacity: 1;
+    filter: grayscale(0);
+    transform: scale(1.06);
+}
+
+/* ---- Rich text (policy/legal pages) typography ---- */
+.rich-text-content {
+    line-height: 1.85;
+}
+
+.rich-text-content h2 {
+    font-size: 1.35rem;
+    margin: 2.2rem 0 0.8rem;
+    padding-left: 0.9rem;
+    border-left: 4px solid var(--edu-secondary);
+}
+
+.rich-text-content h3 {
+    font-size: 1.15rem;
+    margin: 1.8rem 0 0.6rem;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+    padding-left: 1.4rem;
+    margin-bottom: 1.1rem;
+}
+
+.rich-text-content li {
+    margin-bottom: 0.5rem;
+}
+
+.rich-text-content strong {
+    color: var(--edu-heading);
+}
+
+/* Editor-inserted media can never overflow the column */
+.rich-text-content img,
+.rich-text-content iframe {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--edu-radius-sm);
+}
+
+/* ---- Topbar (light utility strip: brand, contact info, socials, CTA) ---- */
+.edu-topbar-light {
+    background: #fff;
+    border-bottom: 1px solid var(--edu-border);
+}
+
+.edu-topbar-light .container {
+    flex-wrap: nowrap;
+}
+
+.edu-topbar-brand {
+    color: inherit;
+}
+
+.edu-topbar-logo {
+    max-height: 46px;
+    width: auto;
+}
+
+.edu-brand-name {
+    font-family: var(--edu-font-heading);
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--edu-heading);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.edu-topbar-tagline {
+    display: -webkit-box;
+    max-width: 270px;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: var(--edu-text);
+    white-space: normal;
+    /* Clamp to exactly 2 lines, ellipsizing anything longer rather than
+       spilling to a 3rd line and throwing off the topbar's height. */
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.edu-topbar-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    text-decoration: none;
+    color: var(--edu-heading);
+}
+
+.edu-topbar-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(var(--edu-primary-rgb), 0.08);
+    color: var(--edu-primary);
+    font-size: 0.78rem;
+}
+
+.edu-topbar-info small {
+    display: block;
+    font-size: 0.62rem;
+    color: var(--edu-text);
+    line-height: 1.25;
+}
+
+.edu-topbar-info strong {
+    display: block;
+    max-width: none;
+    white-space: nowrap;
+    font-size: 0.76rem;
+    line-height: 1.25;
+}
+
+/* This block only had to fit ≥1200px before; now it shows from 992px too,
+   so it gets a slightly tighter size in the narrower 992–1199px band —
+   the email is never truncated, only shrunk a little further. */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .edu-topbar-light .gap-2 {
+        gap: 0.4rem !important;
+    }
+
+    .edu-topbar-tagline {
+        max-width: 210px;
+    }
+
+    .edu-topbar-info strong {
+        font-size: 0.7rem;
+    }
+}
+
+.edu-topbar-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #fff !important;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.edu-topbar-social:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.edu-topbar-apply {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    background: linear-gradient(120deg, var(--edu-primary-dark), var(--edu-primary));
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.55rem 1.2rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px rgba(var(--edu-primary-rgb), 0.28);
+    transition: box-shadow 0.2s ease, transform 0.2s ease, background-position 0.3s ease;
+}
+
+.edu-topbar-apply i {
+    font-size: 0.9rem;
+}
+
+.edu-topbar-apply:hover {
+    background: linear-gradient(120deg, var(--edu-primary), var(--edu-primary-dark));
+    color: #fff !important;
+    box-shadow: 0 10px 22px rgba(var(--edu-primary-rgb), 0.36);
+    transform: translateY(-2px);
+}
+
+.edu-topbar-light .navbar-toggler {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--edu-border);
+    border-radius: 10px;
+    padding: 0;
+    background: #fff;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.edu-topbar-light .navbar-toggler:hover {
+    border-color: var(--edu-primary);
+    background: rgba(var(--edu-primary-rgb), 0.06);
+}
+
+.edu-topbar-light .navbar-toggler i {
+    font-size: 1.3rem;
+    color: var(--edu-heading);
+    line-height: 1;
+}
+
+/* Same 992-1199 crunch as above: the full-size social icons + apply button
+   are too wide for the lg-only container, so scale them back down here. */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .edu-topbar-social {
+        width: 28px;
+        height: 28px;
+        font-size: 0.78rem;
+    }
+
+    .edu-topbar-apply {
+        font-size: 0.74rem;
+        padding: 0.45rem 0.9rem;
+    }
+
+    .edu-topbar-apply i {
+        font-size: 0.78rem;
+    }
+}
+
+/* ---- Navbar (solid dark navy strip below the topbar; centered icon-over-label nav) ---- */
+.edu-navbar-icons {
+    background: var(--edu-primary-dark);
+}
+
+.edu-header.edu-scrolled {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+.edu-nav-icon-link {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.55rem 1.4rem !important;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.edu-nav-icon-link i {
+    font-size: 1.15rem;
+}
+
+.edu-nav-icon-link:hover,
+.edu-nav-icon-link.active {
+    color: var(--edu-secondary) !important;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.edu-nav-icon-link.dropdown-toggle::after {
+    margin-left: 0;
+    margin-top: 0.1rem;
+}
+
+/* Desktop-only: open the submenu on hover instead of requiring a click.
+   Scoped to real hover+fine-pointer devices so touch/tap behavior (which
+   still uses Bootstrap's click-toggle JS) is untouched. */
+@media (hover: hover) and (pointer: fine) {
+    .edu-navbar-icons .nav-item.dropdown:hover > .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+}
+
+.edu-nav-link {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--edu-heading) !important;
+    padding: 0.5rem 0.55rem !important;
+    position: relative;
+}
+
+.edu-nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0.85rem;
+    right: 0.85rem;
+    bottom: 0.2rem;
+    height: 2px;
+    background: var(--edu-secondary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+}
+
+.edu-nav-link:hover {
+    color: var(--edu-primary) !important;
+}
+
+.edu-nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+.edu-nav-link.active {
+    color: var(--edu-primary) !important;
+}
+
+.edu-nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* ---- Mobile slide-in drawer ---- */
+.edu-nav-drawer {
+    max-width: 320px;
+}
+
+.edu-nav-drawer-head {
+    background: linear-gradient(120deg, var(--edu-primary-dark), var(--edu-primary));
+    padding: 1rem 1.25rem;
+}
+
+.edu-nav-drawer-head .edu-brand-name span {
+    color: #fff !important;
+}
+
+@media (max-width: 991.98px) {
+    .edu-nav-link {
+        padding: 0.7rem 0.75rem !important;
+        border-radius: 10px;
+        border-left: 3px solid transparent;
+    }
+
+    .edu-nav-link::after {
+        display: none;
+    }
+
+    .edu-nav-link:hover,
+    .edu-nav-link.active {
+        background: rgba(var(--edu-primary-rgb), 0.06);
+        border-left-color: var(--edu-secondary);
+    }
+
+    .edu-nav-drawer .dropdown-menu {
+        border: 0;
+        box-shadow: none;
+        background: rgba(var(--edu-primary-rgb), 0.04);
+        margin-left: 0.75rem;
+    }
+}
+
+.edu-drawer-extra {
+    border-top: 1px solid var(--edu-border);
+}
+
+.edu-drawer-contact {
+    display: block;
+    padding: 0.45rem 0;
+    color: var(--edu-heading);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.edu-drawer-contact i {
+    color: var(--edu-primary);
+}
+
+.edu-social-btn-dark {
+    background: rgba(var(--edu-primary-rgb), 0.08);
+    color: var(--edu-primary);
+}
+
+
+.edu-topbar-light .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--edu-primary-rgb), 0.15);
+}
+
+.edu-dropdown {
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius-sm);
+    box-shadow: var(--edu-shadow-md);
+    padding: 0.5rem;
+}
+
+.edu-dropdown .dropdown-item {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+}
+
+.edu-dropdown .dropdown-item:hover {
+    background: rgba(var(--edu-primary-rgb), 0.08);
+    color: var(--edu-primary);
+}
+
+/* ---- Footer ---- */
+.edu-footer {
+    background:
+        radial-gradient(900px 400px at 90% -10%, rgba(var(--edu-secondary-rgb), 0.07), transparent 60%),
+        var(--edu-footer-bg);
+    color: #fff;
+}
+
+.edu-footer-muted {
+    color: #D6D9F5;
+    opacity: 0.85;
+}
+
+.edu-footer-heading {
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.6rem;
+    position: relative;
+}
+
+.edu-footer-heading::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 34px;
+    height: 2px;
+    background: var(--edu-secondary);
+}
+
+.edu-footer-link {
+    color: #D6D9F5;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.edu-footer-link:hover {
+    color: var(--edu-secondary);
+    padding-left: 4px;
+}
+
+.edu-social-btn {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    text-decoration: none;
+    transition: background-color 0.25s ease, transform 0.25s ease, color 0.25s ease;
+}
+
+.edu-social-btn:hover {
+    background: var(--edu-secondary);
+    color: var(--edu-primary);
+    transform: translateY(-3px);
+}
+
+.edu-footer-bottom {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Nav (sticky shadow via site.js) ---- */
+header.sticky-top {
+    transition: box-shadow 0.3s ease;
+}
+
+/* ---- Scroll-reveal animations ---- */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-stagger > * {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-stagger.is-visible > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; }
+.animate-stagger.is-visible > *:nth-child(2) { transition-delay: 0.15s; }
+.animate-stagger.is-visible > *:nth-child(3) { transition-delay: 0.25s; }
+.animate-stagger.is-visible > *:nth-child(4) { transition-delay: 0.35s; }
+.animate-stagger.is-visible > *:nth-child(5) { transition-delay: 0.45s; }
+.animate-stagger.is-visible > *:nth-child(6) { transition-delay: 0.55s; }
+
+/* Reveal variants: add alongside .animate-on-scroll */
+.animate-on-scroll.reveal-left {
+    transform: translateX(-48px);
+}
+
+.animate-on-scroll.reveal-right {
+    transform: translateX(48px);
+}
+
+.animate-on-scroll.reveal-zoom {
+    transform: scale(0.92);
+}
+
+.animate-on-scroll.is-visible {
+    transform: none;
+}
+
+/* ---- Back to top ---- */
+.edu-back-top {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 1030;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--edu-primary), var(--edu-accent));
+    color: #fff;
+    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--edu-shadow-btn);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.edu-back-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+.edu-back-top:hover {
+    background: var(--edu-secondary);
+    color: var(--edu-primary);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ==========================================================================
+   Mobile polish — phones (<576px)
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    /* Type scale: keep headings impactful but never overflowing */
+    h2 { font-size: 1.55rem; }
+    .display-6 { font-size: 1.7rem; }
+    .lead { font-size: 1rem; }
+
+    /* Buttons: large CTAs shrink to comfortable tap-size, not billboards */
+    .btn-lg {
+        padding: 0.65rem 1.35rem;
+        font-size: 1rem;
+    }
+
+    /* Slider: shorter, tighter, content centered with breathing room */
+    .edu-slide {
+        min-height: 62vh;
+        padding: 2.5rem 0 5rem;
+    }
+
+    .edu-slide-content {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .edu-slide-eyebrow {
+        font-size: 0.72rem;
+        padding: 0.3rem 0.8rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .edu-slide-sub {
+        font-size: 0.98rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .edu-slider .carousel-indicators {
+        margin-bottom: 1.9rem;
+    }
+
+    .edu-wave svg {
+        height: 30px;
+    }
+
+    /* Section headers: tighter gap under headings */
+    .edu-section .mb-5 {
+        margin-bottom: 2rem !important;
+    }
+
+    /* Stats: 2x2 cards with tighter padding */
+    .edu-stat-card {
+        padding: 1.25rem 0.75rem;
+    }
+
+    /* CTA banner: center trust list, full-width buttons feel */
+    .edu-cta-banner .btn {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .edu-cta-trust {
+        gap: 0.5rem 1rem !important;
+    }
+
+    /* Testimonial slider nav closer to cards */
+    .edu-tslider-nav {
+        margin-top: 0.75rem;
+    }
+
+    /* Footer: comfortable spacing between stacked columns */
+    .edu-footer .row {
+        --bs-gutter-y: 2rem;
+    }
+
+    /* Back-to-top: keep clear of the thumb zone edge */
+    .edu-back-top {
+        right: 0.9rem;
+        bottom: 0.9rem;
+        width: 42px;
+        height: 42px;
+    }
+}
+
+/* Map: taller 16:9 on phones (21:9 becomes a useless letterbox), wide on desktop */
+@media (min-width: 992px) {
+    .edu-map-frame {
+        --bs-aspect-ratio: 42.857%; /* 21x9 */
+    }
+}
+
+/* Tablets (576–991px): moderate scaling for the slider */
+@media (min-width: 576px) and (max-width: 991.98px) {
+    .edu-slide {
+        min-height: 55vh;
+        padding: 3.5rem 0 6rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-on-scroll,
+    .animate-stagger > * {
+        transition: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .carousel-item .edu-slide-eyebrow,
+    .carousel-item .edu-slide-heading,
+    .carousel-item .edu-slide-sub,
+    .carousel-item .edu-slide-content .d-flex {
+        transition: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}

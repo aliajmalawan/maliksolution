@@ -624,6 +624,35 @@ img { max-width: 100%; }
 .lp-foot { background: #0d1426; color: #64748b; text-align: center; padding: 1.4rem; font-size: .78rem; }
 .lp-foot a { color: #8ea0b8; }
 
+/* ── Modal dialog (generic, JS-driven) ───────────────────── */
+.u-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(2, 6, 23, .55); z-index: 2000;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 3.5rem 1rem; overflow-y: auto;
+  opacity: 0; visibility: hidden; transition: opacity .18s, visibility .18s;
+}
+.u-modal-backdrop.open { opacity: 1; visibility: visible; }
+.u-modal {
+  background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 640px; overflow: hidden;
+  transform: translateY(-14px); transition: transform .18s;
+}
+.u-modal-backdrop.open .u-modal { transform: translateY(0); }
+.u-modal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--line);
+}
+.u-modal-head h2 { font-size: 1rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: .55rem; }
+.u-modal-close {
+  width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg);
+  color: var(--muted); display: grid; place-items: center; cursor: pointer; flex-shrink: 0;
+  transition: background .12s, color .12s;
+}
+.u-modal-close:hover { background: rgba(239,68,68,.1); color: var(--danger); }
+.u-modal-body { padding: 1.3rem; max-height: 70vh; overflow-y: auto; }
+.u-modal-foot { padding: 1rem 1.3rem; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: .6rem; }
+body.u-modal-lock { overflow: hidden; }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1200px) { .g-kpi { grid-template-columns: repeat(2, 1fr); } .lp-g4 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 991px) {

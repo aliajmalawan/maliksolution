@@ -78,6 +78,12 @@ if ($action === 'create') {
     $up = $db->prepare('UPDATE ' . tbl('students') . ' SET registration_no = ? WHERE id = ?');
     $up->bind_param('si', $reg, $id); $up->execute(); $up->close();
 
+    // Auto-provision a UMS login (username + password) for the new student
+    $creds = stu_create_login($id, $f['name'], $f['email'], $reg, $campus);
+    if ($creds) {
+        $_SESSION['stu_new_creds'] = ['student_id' => $id, 'name' => $f['name'], 'reg' => $reg, 'email' => $creds['email'], 'password' => $creds['password']];
+    }
+
     // If enrolled from an admission, mark that application as enrolled
     if ($f['admission_id'] > 0) {
         try {
@@ -88,7 +94,7 @@ if ($action === 'create') {
 
     ums_log('student_create', "Added student $reg — {$f['name']}");
     flash_set('success', "Student $reg enrolled.");
-    redirect(stu_url('view.php?id=' . $id));
+    redirect(stu_url('index.php'));
 }
 
 if ($action === 'update') {
@@ -111,7 +117,38 @@ if ($action === 'update') {
 
     ums_log('student_update', "Updated student {$cur['registration_no']}");
     flash_set('success', 'Student updated.');
-    redirect(stu_url('view.php?id=' . $id));
+    redirect(stu_url('index.php'));
+}
+
+if ($action === 'reset_password') {
+    $id  = (int)($_POST['id'] ?? 0);
+    $cur = stu_find($id);
+    if (!$cur) { flash_set('error', 'Student not found.'); redirect(stu_url('index.php')); }
+    $newPw = stu_reset_password($id);
+    if ($newPw === null) {
+        flash_set('error', 'This student has no login account yet.');
+    } else {
+        $login = stu_login_find($id);
+        $_SESSION['stu_new_creds'] = ['student_id' => $id, 'name' => $cur['name'], 'reg' => $cur['registration_no'], 'email' => $login['email'], 'password' => $newPw];
+        ums_log('student_password_reset', "Reset login password for {$cur['registration_no']}");
+        flash_set('success', 'Password reset.');
+    }
+    redirect(stu_url('index.php'));
+}
+
+if ($action === 'generate_login') {
+    $id  = (int)($_POST['id'] ?? 0);
+    $cur = stu_find($id);
+    if (!$cur) { flash_set('error', 'Student not found.'); redirect(stu_url('index.php')); }
+    $creds = stu_create_login($id, $cur['name'], $cur['email'], $cur['registration_no'], (int)$cur['campus_id']);
+    if ($creds === null) {
+        flash_set('error', 'This student already has a login account.');
+    } else {
+        $_SESSION['stu_new_creds'] = ['student_id' => $id, 'name' => $cur['name'], 'reg' => $cur['registration_no'], 'email' => $creds['email'], 'password' => $creds['password']];
+        ums_log('student_login_generate', "Generated login for {$cur['registration_no']}");
+        flash_set('success', 'Login account created.');
+    }
+    redirect(stu_url('index.php'));
 }
 
 if ($action === 'delete') {

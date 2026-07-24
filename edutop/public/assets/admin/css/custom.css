@@ -1,0 +1,24 @@
+/* Admin-only style overrides beyond the Bootstrap 5 defaults go here. */
+
+/* Compact photo-gallery card grid (image_gallery section's Photos repeater) */
+.edu-gallery-card {
+    width: 100px;
+}
+
+.edu-gallery-card img,
+.edu-gallery-card-empty {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    background: #f1f5f9;
+}
+
+.edu-gallery-card-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    line-height: 1;
+}

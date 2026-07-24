@@ -167,6 +167,42 @@ if ($action === 'set_status') {
     redirect($back === 'view' ? adm_url('view.php?id=' . $id) : adm_url('index.php'));
 }
 
+// ────────────────────── STUDENT LOGIN CREDENTIALS ─────────────────────
+if ($action === 'reset_password') {
+    $id  = (int)($_POST['id'] ?? 0);
+    $adm = adm_find($id);
+    $stu = $adm ? adm_linked_student($id) : null;
+    if (!$adm || !$stu) { flash_set('error', 'This application is not linked to an enrolled student.'); redirect(adm_url('index.php')); }
+
+    $newPw = stu_reset_password((int)$stu['id']);
+    if ($newPw === null) {
+        flash_set('error', 'This student has no login account yet.');
+    } else {
+        $login = stu_login_find((int)$stu['id']);
+        $_SESSION['stu_new_creds'] = ['student_id' => (int)$stu['id'], 'name' => $stu['name'], 'reg' => $stu['registration_no'], 'email' => $login['email'], 'password' => $newPw];
+        ums_log('student_password_reset', "Reset login password for {$stu['registration_no']}");
+        flash_set('success', 'Password reset.');
+    }
+    redirect(adm_url('view.php?id=' . $id));
+}
+
+if ($action === 'generate_login') {
+    $id  = (int)($_POST['id'] ?? 0);
+    $adm = adm_find($id);
+    $stu = $adm ? adm_linked_student($id) : null;
+    if (!$adm || !$stu) { flash_set('error', 'This application is not linked to an enrolled student.'); redirect(adm_url('index.php')); }
+
+    $creds = stu_create_login((int)$stu['id'], $stu['name'], $stu['email'], $stu['registration_no'], (int)$stu['campus_id']);
+    if ($creds === null) {
+        flash_set('error', 'This student already has a login account.');
+    } else {
+        $_SESSION['stu_new_creds'] = ['student_id' => (int)$stu['id'], 'name' => $stu['name'], 'reg' => $stu['registration_no'], 'email' => $creds['email'], 'password' => $creds['password']];
+        ums_log('student_login_generate', "Generated login for {$stu['registration_no']}");
+        flash_set('success', 'Login account created.');
+    }
+    redirect(adm_url('view.php?id=' . $id));
+}
+
 // ─────────────────────────────── DELETE ───────────────────────────────
 if ($action === 'delete') {
     $id  = (int)($_POST['id'] ?? 0);

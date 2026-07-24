@@ -36,6 +36,19 @@ function ums_migrate(): void
         INDEX idx_campus_role (campus_id, role)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
+    // Additive link: a UMS login can belong to a student (Students/Admissions
+    // modules read/write this; core users schema otherwise untouched).
+    $has = $db->query("SHOW COLUMNS FROM " . tbl('users') . " LIKE 'student_id'");
+    if ($has && $has->num_rows === 0) {
+        $db->query('ALTER TABLE ' . tbl('users') . ' ADD COLUMN student_id INT NULL AFTER campus_id, ADD UNIQUE KEY uniq_student (student_id)');
+    }
+
+    // Additive link: a UMS login can belong to a teacher (Teachers module reads/writes this).
+    $has = $db->query("SHOW COLUMNS FROM " . tbl('users') . " LIKE 'teacher_id'");
+    if ($has && $has->num_rows === 0) {
+        $db->query('ALTER TABLE ' . tbl('users') . ' ADD COLUMN teacher_id INT NULL AFTER student_id, ADD UNIQUE KEY uniq_teacher (teacher_id)');
+    }
+
     $db->query('CREATE TABLE IF NOT EXISTS ' . tbl('settings') . ' (
         name VARCHAR(100) PRIMARY KEY,
         value TEXT

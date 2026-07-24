@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS page_views (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    url VARCHAR(500) NOT NULL,
+    ip VARCHAR(45) NOT NULL,
+    user_agent VARCHAR(255) NOT NULL,
+    referrer VARCHAR(500) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_page_views_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

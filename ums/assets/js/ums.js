@@ -47,4 +47,28 @@
   document.querySelectorAll('.u-pop').forEach(function (p) {
     p.addEventListener('click', function (e) { e.stopPropagation(); });
   });
+
+  /* ── Generic modal dialogs ── */
+  window.umsOpenModal = function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('open');
+    document.body.classList.add('u-modal-lock');
+  };
+  window.umsCloseModal = function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('open');
+    document.body.classList.remove('u-modal-lock');
+  };
+  document.querySelectorAll('[data-modal-close]').forEach(function (btn) {
+    btn.addEventListener('click', function () { window.umsCloseModal(btn.closest('.u-modal-backdrop').id); });
+  });
+  document.querySelectorAll('.u-modal-backdrop').forEach(function (bd) {
+    bd.addEventListener('click', function (e) { if (e.target === bd) window.umsCloseModal(bd.id); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.u-modal-backdrop.open').forEach(function (bd) { window.umsCloseModal(bd.id); });
+  });
 })();

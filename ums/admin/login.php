@@ -2,9 +2,13 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../includes/bootstrap.php';
 
-// Already signed in (or via remember-me) → straight to the role's home
+if (($_GET['switch'] ?? '') === '1') { ums_logout(); redirect(UMS_URL . '/admin/login.php'); }
+
+// Already signed in as staff (or via remember-me) → straight to the dashboard
+$switchUser = null;
 if ($u = ums_user()) {
-    redirect(ums_role_home($u['role']));
+    if (in_array($u['role'], UMS_ADMIN_ROLES, true)) { redirect(ums_role_home($u['role'])); }
+    $switchUser = $u; // signed in as teacher/student — show a notice instead of silently bouncing away
 }
 
 $site = dirname(UMS_URL); // company website root
@@ -181,6 +185,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <a href="<?= e($resetLink) ?>" class="link-blue" style="word-break:break-all"><?= e($resetLink) ?></a>
             </div>
           <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if ($switchUser): ?>
+          <div class="alert alert-info d-flex align-items-center gap-2 py-2" style="font-size:.86rem">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>You're currently signed in as <strong><?= e($switchUser['name']) ?></strong> (<?= e(ucfirst($switchUser['role'])) ?>).
+            <a href="?switch=1" style="font-weight:700">Log out</a> to sign in as staff instead.</span>
+          </div>
         <?php endif; ?>
 
         <form method="post" autocomplete="on">

@@ -11,6 +11,7 @@ declare(strict_types=1);
  */
 
 require_once __DIR__ . '/../../includes/bootstrap.php';
+require_once __DIR__ . '/../../includes/crud.php';
 require_login(['super_admin', 'admin', 'accountant']);
 
 /** Current user — available to every page that includes this init. */
@@ -110,4 +111,17 @@ function adm_find(int $id): ?array
 function adm_url(string $path = ''): string
 {
     return UMS_URL . '/modules/admissions/' . $path;
+}
+
+/** The enrolled student record linked to this application, if one exists. */
+function adm_linked_student(int $admissionId): ?array
+{
+    try {
+        $stmt = ums_db()->prepare('SELECT * FROM ' . tbl('students') . ' WHERE admission_id = ? LIMIT 1');
+        $stmt->bind_param('i', $admissionId); $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc(); $stmt->close();
+        return $row ?: null;
+    } catch (Throwable $t) {
+        return null; // students table not created yet
+    }
 }

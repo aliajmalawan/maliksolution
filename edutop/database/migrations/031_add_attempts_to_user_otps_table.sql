@@ -1,0 +1,2 @@
+ALTER TABLE user_otps
+    ADD COLUMN attempts TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER otp_hash;

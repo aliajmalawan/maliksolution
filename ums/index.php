@@ -268,8 +268,8 @@ $features = [
           <a href="<?= e($site) ?>/demonstration.php#book-demo" class="btn btn-ghost"><i class="fa-solid fa-calendar-check me-2"></i>Book Live Demo</a>
         </div>
         <div class="portal-links d-flex gap-2 flex-wrap mt-3 rv">
-          <a href="<?= e($site) ?>/Teacher/login.php"><i class="fa-solid fa-person-chalkboard"></i> Teacher Login</a>
-          <a href="<?= e($site) ?>/student/login.php"><i class="fa-solid fa-user-graduate"></i> Student Login</a>
+          <a href="<?= UMS_URL ?>/teacher/login.php"><i class="fa-solid fa-person-chalkboard"></i> Teacher Login</a>
+          <a href="<?= UMS_URL ?>/student/login.php"><i class="fa-solid fa-user-graduate"></i> Student Login</a>
         </div>
       </div>
       <div class="col-lg-6">
@@ -382,7 +382,7 @@ $features = [
       <div class="col-lg-6 rv">
         <div class="pv-label">
           <i class="fa-solid fa-person-chalkboard"></i> Teacher Portal
-          <a href="<?= e($site) ?>/Teacher/login.php" class="btn btn-outline-primary btn-pill-sm ms-auto" style="border-radius:30px">Teacher Login</a>
+          <a href="<?= UMS_URL ?>/teacher/login.php" class="btn btn-outline-primary btn-pill-sm ms-auto" style="border-radius:30px">Teacher Login</a>
         </div>
         <div class="frame">
           <div class="frame-bar"><i></i><i></i><i></i><span class="frame-url">/teacher/portal</span></div>
@@ -405,7 +405,7 @@ $features = [
       <div class="col-lg-6 rv">
         <div class="pv-label">
           <i class="fa-solid fa-user-graduate"></i> Student Portal
-          <a href="<?= e($site) ?>/student/login.php" class="btn btn-outline-primary btn-pill-sm ms-auto" style="border-radius:30px">Student Login</a>
+          <a href="<?= UMS_URL ?>/student/login.php" class="btn btn-outline-primary btn-pill-sm ms-auto" style="border-radius:30px">Student Login</a>
         </div>
         <div class="frame">
           <div class="frame-bar"><i></i><i></i><i></i><span class="frame-url">/student/portal</span></div>

@@ -60,13 +60,7 @@ const TCH_STATUS = [
     'inactive' => ['Inactive', 'st-rejected'],
 ];
 
-function tch_find(int $id): ?array
-{
-    $stmt = ums_db()->prepare('SELECT * FROM ' . tbl('teachers') . ' WHERE id = ? LIMIT 1');
-    $stmt->bind_param('i', $id); $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc(); $stmt->close();
-    return $row ?: null;
-}
+// tch_find() now lives in includes/crud.php — shared with the Teacher Portal.
 
 function tch_url(string $path = ''): string
 {

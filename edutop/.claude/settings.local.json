@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe\" -u root edutop -e \"SELECT id, section_type, content FROM page_sections WHERE page_id=\\(SELECT id FROM pages WHERE slug='about'\\);\")",
+      "PowerShell(& \"C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe\" -u root edutop -e \"DELETE FROM leads WHERE email IN \\('john@example.com','principal@school.edu'\\); DELETE FROM blog_comments WHERE author_email='jane@example.com';\")",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost/EduTop/\" -UseBasicParsing)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost/EduTop/about\" -UseBasicParsing)",
+      "PowerShell(\\(Get-Command chromium-cli -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npx -ErrorAction SilentlyContinue\\).Source)",
+      "Bash(curl -s http://localhost:9334/json)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

@@ -6,6 +6,15 @@ $id  = (int)($_GET['id'] ?? 0);
 $adm = adm_find($id);
 if (!$adm) { flash_set('error', 'Application not found.'); redirect(adm_url('index.php')); }
 
+$stu = adm_linked_student($id);
+$login = $stu ? stu_login_find((int)$stu['id']) : null;
+
+$newCreds = null;
+if (!empty($_SESSION['stu_new_creds']) && $stu && (int)$_SESSION['stu_new_creds']['student_id'] === (int)$stu['id']) {
+    $newCreds = $_SESSION['stu_new_creds'];
+    unset($_SESSION['stu_new_creds']);
+}
+
 $page_title = 'Application ' . $adm['application_no'];
 $active     = 'admissions';
 
@@ -36,6 +45,47 @@ require __DIR__ . '/../../includes/header.php';
     <a href="<?= adm_url('print.php?id=' . $id) ?>" target="_blank" class="u-btn u-btn-primary"><i class="fa-solid fa-print"></i> Print Form</a>
   </div>
 </div>
+
+<?php if ($newCreds): ?>
+<div class="u-card" style="margin-bottom:1.1rem;border:1.5px solid var(--primary)">
+  <div class="u-card-head"><h2><i class="fa-solid fa-key" style="color:var(--primary)"></i> Login Password — <?= e($newCreds['name']) ?> (<?= e($newCreds['reg']) ?>)</h2></div>
+  <p style="color:var(--muted);margin:0 0 .8rem">Share these with the student now — the password will <strong>not</strong> be shown again until you reset it.</p>
+  <div class="u-form-grid">
+    <div class="u-fld"><label>Username / Email</label><input type="text" readonly value="<?= e($newCreds['email']) ?>" onclick="this.select()"></div>
+    <div class="u-fld"><label>Password</label><input type="text" readonly value="<?= e($newCreds['password']) ?>" onclick="this.select()" style="font-family:monospace;font-weight:700"></div>
+  </div>
+</div>
+<?php elseif ($stu): ?>
+<div class="u-card" style="margin-bottom:1.1rem">
+  <div class="u-card-head"><h2><i class="fa-solid fa-key" style="color:var(--primary)"></i> Login Access</h2>
+    <span class="hint">Student <?= e($stu['registration_no']) ?></span></div>
+  <?php if ($login): ?>
+    <div class="u-form-grid">
+      <div class="u-fld"><label>Username / Email</label><input type="text" readonly value="<?= e($login['email']) ?>" onclick="this.select()"></div>
+      <div class="u-fld">
+        <label>Password</label>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" readonly value="Hidden — click Reset to generate a new one" style="color:var(--muted);font-style:italic">
+          <form method="post" action="<?= adm_url('action.php') ?>" onsubmit="return confirm('Generate a new password? The old one will stop working immediately.')">
+            <?= csrf_field() ?><input type="hidden" name="action" value="reset_password"><input type="hidden" name="id" value="<?= $id ?>">
+            <button type="submit" class="u-btn u-btn-soft" style="white-space:nowrap"><i class="fa-solid fa-rotate"></i> Reset</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.8rem;margin:.6rem 0 0"><i class="fa-solid fa-circle-info"></i> For security, the password can't be viewed again once set — click Reset to generate a new one you can see and share.</p>
+  <?php else: ?>
+    <div class="u-empty" style="padding:1.5rem">
+      <i class="fa-solid fa-key"></i>
+      <p>This student doesn't have a login account yet.</p>
+      <form method="post" action="<?= adm_url('action.php') ?>" style="margin-top:.6rem">
+        <?= csrf_field() ?><input type="hidden" name="action" value="generate_login"><input type="hidden" name="id" value="<?= $id ?>">
+        <button type="submit" class="u-btn u-btn-primary"><i class="fa-solid fa-key"></i> Generate Login</button>
+      </form>
+    </div>
+  <?php endif; ?>
+</div>
+<?php endif; ?>
 
 <div class="u-grid g-main">
   <div>

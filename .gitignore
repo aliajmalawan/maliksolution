@@ -16,6 +16,9 @@ ums/uploads/teachers/*
 ums/uploads/admissions/*
 !ums/uploads/admissions/.gitkeep
 
+# ── Database dumps — real data, never commit ──
+maliksolution.sql
+
 # ── OS / editor cruft ──
 .DS_Store
 Thumbs.db

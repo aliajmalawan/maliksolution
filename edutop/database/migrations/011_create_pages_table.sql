@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS pages (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(190) NOT NULL UNIQUE,
+    title VARCHAR(190) NOT NULL,
+    status ENUM('published', 'draft') NOT NULL DEFAULT 'draft',
+    is_home TINYINT(1) NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    INDEX idx_pages_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

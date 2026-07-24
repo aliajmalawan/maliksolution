@@ -27,8 +27,9 @@ $cs->bind_param($types, ...$args); $cs->execute();
 $total = (int)$cs->get_result()->fetch_assoc()['c']; $cs->close();
 $pages = max(1, (int)ceil($total / $perPage));
 
-$ls = $db->prepare('SELECT s.*, d.name AS dept_name FROM ' . tbl('students') . ' s
+$ls = $db->prepare('SELECT s.*, d.name AS dept_name, u.email AS login_email FROM ' . tbl('students') . ' s
     LEFT JOIN ' . tbl('departments') . ' d ON d.id = s.department_id
+    LEFT JOIN ' . tbl('users') . ' u ON u.student_id = s.id
     WHERE ' . $whereSql . ' ORDER BY s.id DESC LIMIT ? OFFSET ?');
 $ls->bind_param($types . 'ii', ...array_merge($args, [$perPage, $offset]));
 $ls->execute();
@@ -49,6 +50,12 @@ try {
     $enrollable = (int)$er->fetch_assoc()['c'];
 } catch (Throwable $t) {}
 
+$newCreds = null;
+if (!empty($_SESSION['stu_new_creds'])) {
+    $newCreds = $_SESSION['stu_new_creds'];
+    unset($_SESSION['stu_new_creds']);
+}
+
 require __DIR__ . '/../../includes/header.php';
 ?>
 <div class="u-page-head">
@@ -58,6 +65,17 @@ require __DIR__ . '/../../includes/header.php';
     <a href="<?= stu_url('create.php') ?>" class="u-btn u-btn-primary"><i class="fa-solid fa-user-plus"></i> Enroll Student</a>
   </div>
 </div>
+
+<?php if ($newCreds): ?>
+<div class="u-card" style="margin-bottom:1.1rem;border:1.5px solid var(--primary)">
+  <div class="u-card-head"><h2><i class="fa-solid fa-key" style="color:var(--primary)"></i> Login Password — <?= e($newCreds['name']) ?> (<?= e($newCreds['reg']) ?>)</h2></div>
+  <p style="color:var(--muted);margin:0 0 .8rem">Share these with the student now — the password will <strong>not</strong> be shown again until you reset it.</p>
+  <div class="u-form-grid">
+    <div class="u-fld"><label>Username / Email</label><input type="text" readonly value="<?= e($newCreds['email']) ?>" onclick="this.select()"></div>
+    <div class="u-fld"><label>Password</label><input type="text" readonly value="<?= e($newCreds['password']) ?>" onclick="this.select()" style="font-family:monospace;font-weight:700"></div>
+  </div>
+</div>
+<?php endif; ?>
 
 <?php if ($enrollable > 0): ?>
   <div class="u-flash info" style="margin-bottom:1.1rem">
@@ -114,7 +132,29 @@ require __DIR__ . '/../../includes/header.php';
             <td style="color:var(--muted)"><?= e($r['session'] ?: '—') ?></td>
             <td><?= status_badge($r['status'], STU_STATUS) ?></td>
             <td style="text-align:right"><span class="u-act">
-              <a href="<?= stu_url('view.php?id='.(int)$r['id']) ?>" title="View"><i class="fa-solid fa-eye"></i></a>
+              <button type="button" class="btn-stu-view" title="View"
+                data-id="<?= (int)$r['id'] ?>"
+                data-name="<?= e($r['name']) ?>"
+                data-photo="<?= e($r['photo']) ?>"
+                data-father="<?= e($r['father_name']) ?>"
+                data-gender="<?= e(ucfirst($r['gender'])) ?>"
+                data-dob="<?= $r['dob'] ? e(date('d M Y', strtotime($r['dob']))) : '' ?>"
+                data-cnic="<?= e($r['cnic']) ?>"
+                data-phone="<?= e($r['phone']) ?>"
+                data-email="<?= e($r['email']) ?>"
+                data-address="<?= e($r['address']) ?>"
+                data-regno="<?= e($r['registration_no']) ?>"
+                data-program="<?= e($r['program']) ?>"
+                data-dept="<?= e($r['dept_name'] ?: '') ?>"
+                data-session="<?= e($r['session']) ?>"
+                data-batch="<?= e($r['batch']) ?>"
+                data-semester="<?= (int)$r['current_semester'] ?>"
+                data-status-label="<?= e(STU_STATUS[$r['status']][0]) ?>"
+                data-status-class="<?= e(STU_STATUS[$r['status']][1]) ?>"
+                data-admission-id="<?= (int)$r['admission_id'] ?>"
+                data-login-email="<?= e($r['login_email'] ?: '') ?>"
+                style="border:none;background:none;color:inherit;cursor:pointer;padding:0"
+              ><i class="fa-solid fa-eye"></i></button>
               <a href="<?= stu_url('edit.php?id='.(int)$r['id']) ?>" title="Edit"><i class="fa-solid fa-pen"></i></a>
               <form method="post" action="<?= stu_url('action.php') ?>" style="display:inline" onsubmit="return confirm('Delete this student?')">
                 <?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
@@ -127,4 +167,116 @@ require __DIR__ . '/../../includes/header.php';
     <?= crud_pager($page, $pages, fn($p) => '?' . qs_keep(['q','department','program','semester','status'], ['page'=>$p])) ?>
   <?php endif; ?>
 </div>
+
+<!-- ── View Student Modal ──────────────────────────────────── -->
+<div class="u-modal-backdrop" id="stuViewModal">
+  <div class="u-modal">
+    <div class="u-modal-head">
+      <h2><i class="fa-solid fa-user-graduate" style="color:var(--primary)"></i> <span id="mv_name">Student</span></h2>
+      <button type="button" class="u-modal-close" data-modal-close><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="u-modal-body">
+      <div class="u-detail" style="margin-bottom:1.1rem">
+        <div class="row-x"><span class="k">Registration No.</span><span class="v" id="mv_regno"></span></div>
+        <div class="row-x"><span class="k">Status</span><span class="v" id="mv_status"></span></div>
+        <div class="row-x"><span class="k">Program</span><span class="v" id="mv_program"></span></div>
+        <div class="row-x"><span class="k">Department</span><span class="v" id="mv_dept"></span></div>
+        <div class="row-x"><span class="k">Session</span><span class="v" id="mv_session"></span></div>
+        <div class="row-x"><span class="k">Batch</span><span class="v" id="mv_batch"></span></div>
+        <div class="row-x"><span class="k">Current Semester</span><span class="v" id="mv_semester"></span></div>
+        <div class="row-x" id="mv_adm_row" style="display:none"><span class="k">Admission</span><span class="v"><a href="#" id="mv_adm_link" style="color:var(--primary)">View application</a></span></div>
+      </div>
+      <div class="u-detail" style="margin-bottom:1.1rem">
+        <div class="row-x"><span class="k">Father / Guardian</span><span class="v" id="mv_father"></span></div>
+        <div class="row-x"><span class="k">Gender</span><span class="v" id="mv_gender"></span></div>
+        <div class="row-x"><span class="k">Date of Birth</span><span class="v" id="mv_dob"></span></div>
+        <div class="row-x"><span class="k">CNIC / B-Form</span><span class="v" id="mv_cnic"></span></div>
+        <div class="row-x"><span class="k">Phone</span><span class="v" id="mv_phone"></span></div>
+        <div class="row-x"><span class="k">Email</span><span class="v" id="mv_email"></span></div>
+        <div class="row-x"><span class="k">Address</span><span class="v" id="mv_address"></span></div>
+      </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:1rem">
+        <h3 style="font-size:.85rem;font-weight:800;margin:0 0 .6rem;display:flex;align-items:center;gap:.5rem"><i class="fa-solid fa-key" style="color:var(--primary)"></i> Login Access</h3>
+        <div id="mv_login_has">
+          <div class="u-form-grid">
+            <div class="u-fld"><label>Username / Email</label><input type="text" readonly id="mv_login_email" onclick="this.select()"></div>
+            <div class="u-fld">
+              <label>Password</label>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <input type="text" readonly value="Hidden — click Reset to generate a new one" style="color:var(--muted);font-style:italic">
+                <form method="post" action="<?= stu_url('action.php') ?>" onsubmit="return confirm('Generate a new password? The old one will stop working immediately.')">
+                  <?= csrf_field() ?><input type="hidden" name="action" value="reset_password"><input type="hidden" name="id" id="mv_reset_id">
+                  <button type="submit" class="u-btn u-btn-soft" style="white-space:nowrap"><i class="fa-solid fa-rotate"></i> Reset</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="mv_login_none" class="u-empty" style="padding:1rem;display:none">
+          <i class="fa-solid fa-key"></i>
+          <p>This student doesn't have a login account yet.</p>
+          <form method="post" action="<?= stu_url('action.php') ?>" style="margin-top:.5rem">
+            <?= csrf_field() ?><input type="hidden" name="action" value="generate_login"><input type="hidden" name="id" id="mv_gen_id">
+            <button type="submit" class="u-btn u-btn-primary"><i class="fa-solid fa-key"></i> Generate Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="u-modal-foot">
+      <a href="#" id="mv_edit_link" class="u-btn u-btn-primary"><i class="fa-solid fa-pen"></i> Edit</a>
+      <button type="button" class="u-btn u-btn-soft" data-modal-close>Close</button>
+    </div>
+  </div>
+</div>
+
+<?php
+$umsUrl = UMS_URL;
+$page_scripts = <<<HTML
+<script>
+document.querySelectorAll('.btn-stu-view').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var d = btn.dataset;
+    document.getElementById('mv_name').textContent    = d.name || 'Student';
+    document.getElementById('mv_regno').textContent    = d.regno || '—';
+    document.getElementById('mv_program').textContent  = d.program || '—';
+    document.getElementById('mv_dept').textContent     = d.dept || '—';
+    document.getElementById('mv_session').textContent  = d.session || '—';
+    document.getElementById('mv_batch').textContent    = d.batch || '—';
+    document.getElementById('mv_semester').textContent = d.semester || '—';
+    document.getElementById('mv_father').textContent   = d.father || '—';
+    document.getElementById('mv_gender').textContent   = d.gender || '—';
+    document.getElementById('mv_dob').textContent      = d.dob || '—';
+    document.getElementById('mv_cnic').textContent     = d.cnic || '—';
+    document.getElementById('mv_phone').textContent    = d.phone || '—';
+    document.getElementById('mv_email').textContent    = d.email || '—';
+    document.getElementById('mv_address').textContent  = d.address || '—';
+    document.getElementById('mv_status').innerHTML     = '<span class="st ' + d.statusClass + '">' + d.statusLabel + '</span>';
+
+    var admRow = document.getElementById('mv_adm_row');
+    if (d.admissionId && d.admissionId !== '0') {
+      document.getElementById('mv_adm_link').href = '$umsUrl/modules/admissions/view.php?id=' + d.admissionId;
+      admRow.style.display = '';
+    } else {
+      admRow.style.display = 'none';
+    }
+
+    document.getElementById('mv_edit_link').href = 'edit.php?id=' + d.id;
+
+    var hasLogin = d.loginEmail && d.loginEmail.trim() !== '';
+    document.getElementById('mv_login_has').style.display  = hasLogin ? '' : 'none';
+    document.getElementById('mv_login_none').style.display = hasLogin ? 'none' : '';
+    if (hasLogin) {
+      document.getElementById('mv_login_email').value = d.loginEmail;
+      document.getElementById('mv_reset_id').value = d.id;
+    } else {
+      document.getElementById('mv_gen_id').value = d.id;
+    }
+
+    window.umsOpenModal('stuViewModal');
+  });
+});
+</script>
+HTML;
+?>
 <?php require __DIR__ . '/../../includes/footer.php'; ?>

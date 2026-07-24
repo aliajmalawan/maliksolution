@@ -73,6 +73,12 @@ if ($action === 'create') {
     $up = $db->prepare('UPDATE ' . tbl('teachers') . ' SET employee_no = ? WHERE id = ?');
     $up->bind_param('si', $empNo, $id); $up->execute(); $up->close();
 
+    // Auto-provision a UMS login (username + password) for the new teacher
+    $creds = tch_create_login($id, $f['name'], $f['email'], $empNo, $campus);
+    if ($creds) {
+        $_SESSION['tch_new_creds'] = ['teacher_id' => $id, 'name' => $f['name'], 'empno' => $empNo, 'email' => $creds['email'], 'password' => $creds['password']];
+    }
+
     ums_log('teacher_create', "Added teacher $empNo — {$f['name']}");
     flash_set('success', "Teacher $empNo added.");
     redirect(tch_url('view.php?id=' . $id));
@@ -98,6 +104,37 @@ if ($action === 'update') {
 
     ums_log('teacher_update', "Updated teacher {$cur['employee_no']}");
     flash_set('success', 'Teacher updated.');
+    redirect(tch_url('view.php?id=' . $id));
+}
+
+if ($action === 'reset_password') {
+    $id  = (int)($_POST['id'] ?? 0);
+    $cur = tch_find($id);
+    if (!$cur) { flash_set('error', 'Teacher not found.'); redirect(tch_url('index.php')); }
+    $newPw = tch_reset_password($id);
+    if ($newPw === null) {
+        flash_set('error', 'This teacher has no login account yet.');
+    } else {
+        $login = tch_login_find($id);
+        $_SESSION['tch_new_creds'] = ['teacher_id' => $id, 'name' => $cur['name'], 'empno' => $cur['employee_no'], 'email' => $login['email'], 'password' => $newPw];
+        ums_log('teacher_password_reset', "Reset login password for {$cur['employee_no']}");
+        flash_set('success', 'Password reset.');
+    }
+    redirect(tch_url('view.php?id=' . $id));
+}
+
+if ($action === 'generate_login') {
+    $id  = (int)($_POST['id'] ?? 0);
+    $cur = tch_find($id);
+    if (!$cur) { flash_set('error', 'Teacher not found.'); redirect(tch_url('index.php')); }
+    $creds = tch_create_login($id, $cur['name'], $cur['email'], $cur['employee_no'], (int)$cur['campus_id']);
+    if ($creds === null) {
+        flash_set('error', 'This teacher already has a login account.');
+    } else {
+        $_SESSION['tch_new_creds'] = ['teacher_id' => $id, 'name' => $cur['name'], 'empno' => $cur['employee_no'], 'email' => $creds['email'], 'password' => $creds['password']];
+        ums_log('teacher_login_generate', "Generated login for {$cur['employee_no']}");
+        flash_set('success', 'Login account created.');
+    }
     redirect(tch_url('view.php?id=' . $id));
 }
 

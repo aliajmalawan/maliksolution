@@ -1,0 +1,1 @@
+ALTER TABLE pages ADD COLUMN position INT NOT NULL DEFAULT 0 AFTER is_home;

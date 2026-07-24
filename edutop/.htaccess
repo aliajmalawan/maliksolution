@@ -1,0 +1,34 @@
+Options -Indexes -MultiViews
+RewriteEngine On
+
+# Block access to dotfiles (.env, .git, etc.) and common sensitive extensions
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.(sql|log|md|lock|json|yml|yaml)$">
+    Require all denied
+</FilesMatch>
+
+# Force HTTPS when APP_FORCE_HTTPS=1 is set (see public/index.php for the env-driven check;
+# this rule is a defense-in-depth backstop and is safe to enable once you have a valid cert)
+# RewriteCond %{HTTPS} off
+# RewriteCond %{ENV:APP_FORCE_HTTPS} 1
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Serve real, individual files under public/ (assets, uploads) directly.
+# Deliberately file-only (no -d check): directory browsing is disabled above,
+# and the project root itself is a directory, which would otherwise match -d
+# and bypass the front controller entirely for "/".
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Everything else goes through the public/ front controller. The front controller
+# resolves the route path itself (via SCRIPT_NAME), so no path rewriting is needed here.
+RewriteRule ^ public/index.php [L]
+
+# Security headers (also set in PHP for finer control; duplicated here for static assets)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
