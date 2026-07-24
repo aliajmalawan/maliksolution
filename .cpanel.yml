@@ -2,6 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home2/maliksol/public_html
-    - /bin/cp -R . $DEPLOYPATH
-
-
+    - /bin/cp -R AdminCP admin assets includes student teacher ums $DEPLOYPATH
+    - /bin/cp *.php $DEPLOYPATH
