@@ -1,0 +1,108 @@
+Options -Indexes
+ErrorDocument 404 /alpineschool/404.php
+
+# ---------------------------------------------------------------
+# Clean URLs for the dynamic SEO files
+# ---------------------------------------------------------------
+RewriteEngine On
+RewriteBase /alpineschool/
+RewriteRule ^sitemap\.xml$ sitemap.xml.php [L]
+RewriteRule ^robots\.txt$ robots.txt.php [L]
+
+# ---------------------------------------------------------------
+# Clean page URLs — hide the .php extension site-wide
+# ---------------------------------------------------------------
+# 1) Permanently redirect direct *.php requests to the clean URL.
+#    GET only (form submissions must never be redirected); admin excluded.
+#    THE_REQUEST matches only the original browser request, so the
+#    internal rewrite in step 2 can't cause a redirect loop.
+RewriteCond %{REQUEST_METHOD} =GET
+RewriteCond %{THE_REQUEST} \s/([^?\s]+/)?index\.php[?\s]
+RewriteRule ^index\.php$ /alpineschool/ [R=301,L]
+
+RewriteCond %{REQUEST_METHOD} =GET
+RewriteCond %{THE_REQUEST} \s/[^?\s]+\.php[?\s]
+RewriteCond %{REQUEST_URI} !/admin/
+RewriteRule ^(.+)\.php$ $1 [R=301,L]
+
+# 2) Internally serve /page as page.php when that file exists.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^.]+)$ $1.php [L]
+
+# ---------------------------------------------------------------
+# Compression — shrinks HTML/CSS/JS/SVG by ~70-80%
+# ---------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript
+  AddOutputFilterByType DEFLATE application/json application/xml application/rss+xml
+  AddOutputFilterByType DEFLATE image/svg+xml application/x-font-ttf font/opentype
+
+  # Don't try to compress already-compressed formats.
+  SetEnvIfNoCase Request_URI \.(?:jpe?g|png|gif|webp|avif|zip|gz|pdf|mp4|webm)$ no-gzip dont-vary
+</IfModule>
+
+# ---------------------------------------------------------------
+# Browser caching — long life for versioned static assets
+# ---------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                          "access plus 1 month"
+
+  ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType application/javascript    "access plus 1 year"
+  ExpiresByType text/javascript           "access plus 1 year"
+
+  ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/webp                "access plus 1 year"
+  ExpiresByType image/gif                 "access plus 1 year"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType image/x-icon              "access plus 1 year"
+
+  ExpiresByType video/mp4                 "access plus 1 year"
+  ExpiresByType application/pdf           "access plus 1 week"
+
+  # HTML is dynamic — always revalidate.
+  ExpiresByType text/html                 "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Immutable caching for fingerprinted assets (?v=hash) and uploads.
+  <FilesMatch "\.(css|js|jpg|jpeg|png|webp|gif|svg|ico|woff2?|mp4|webm)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header unset Pragma
+  </FilesMatch>
+
+  # Keep connections warm.
+  Header set Connection keep-alive
+
+  # Security hardening (cheap wins, no perf cost).
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Serve pre-generated .gz variants when present (built by the asset minifier).
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP:Accept-Encoding} gzip
+  RewriteCond %{REQUEST_FILENAME}\.gz -f
+  RewriteRule ^(.*)\.(css|js)$ $1.$2.gz [QSA,L]
+</IfModule>
+<IfModule mod_headers.c>
+  # Pre-compressed assets keep the same long-lived caching as their originals.
+  <FilesMatch "\.css\.gz$">
+    Header set Content-Type "text/css"
+    Header set Content-Encoding "gzip"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header append Vary "Accept-Encoding"
+  </FilesMatch>
+  <FilesMatch "\.js\.gz$">
+    Header set Content-Type "application/javascript"
+    Header set Content-Encoding "gzip"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header append Vary "Accept-Encoding"
+  </FilesMatch>
+</IfModule>

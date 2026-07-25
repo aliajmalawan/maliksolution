@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/xampp/htdocs/EduTop/app/Views/admin/blog/posts/**)",
+      "Bash(C:/xampp/mysql/bin/mysql.exe -u root alpine_school_db --default-character-set=utf8mb4 -e ' *)"
+    ]
+  }
+}
