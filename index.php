@@ -1,5 +1,8 @@
 <?php
 declare(strict_types=1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1)
+
 $current   = 'index.php';
 $pageTitle = 'Home';
 require_once 'includes/site-header.php';
@@ -91,18 +94,18 @@ for ($i = 1; $i <= 3; $i++) {
 <div class="marquee-band">
   <div class="marquee-track">
     <?php for ($i = 0; $i < 2; $i++): ?>
-      <span><i class="fa-brands fa-react"></i> React</span>
-      <span><i class="fa-brands fa-laravel"></i> Laravel</span>
-      <span><i class="fa-brands fa-php"></i> PHP</span>
-      <span><i class="fa-brands fa-js"></i> JavaScript</span>
-      <span><i class="fa-brands fa-flutter"></i> Flutter</span>
-      <span><i class="fa-brands fa-android"></i> Android</span>
-      <span><i class="fa-brands fa-apple"></i> iOS</span>
-      <span><i class="fa-brands fa-wordpress"></i> WordPress</span>
-      <span><i class="fa-brands fa-aws"></i> AWS</span>
-      <span><i class="fa-brands fa-microsoft"></i> Azure</span>
-      <span><i class="fa-solid fa-database"></i> MySQL</span>
-      <span><i class="fa-brands fa-node-js"></i> Node.js</span>
+      <span><i class="fa-brands fa-react"></i> Ali</span>
+      <span><i class="fa-brands fa-laravel"></i> Ajmal</span>
+      <span><i class="fa-brands fa-php"></i> Awan</span>
+      <span><i class="fa-brands fa-js"></i> Ajmal</span>
+      <span><i class="fa-brands fa-flutter"></i> Hussain</span>
+      <span><i class="fa-brands fa-android"></i> Malik</span>
+      <span><i class="fa-brands fa-apple"></i> Talib</span>
+      <span><i class="fa-brands fa-wordpress"></i> Hussain</span>
+      <span><i class="fa-brands fa-aws"></i> Malik</span>
+      <span><i class="fa-brands fa-microsoft"></i> Malik</span>
+      <span><i class="fa-solid fa-database"></i> Fazal</span>
+      <span><i class="fa-brands fa-node-js"></i> Ilahi</span>
     <?php endfor; ?>
   </div>
 </div>
