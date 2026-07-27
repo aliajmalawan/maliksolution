@@ -38,13 +38,14 @@ function pj_parse_projects(string $raw): array {
         $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', $block)), fn($l) => $l !== ''));
         if (count($lines) < 6) continue;
         [$cats, $catLabel, $year, $status] = array_pad(array_map('trim', explode('|', $lines[1], 4)), 4, '');
-        [$industry, $duration, $platform]  = array_pad(array_map('trim', explode('|', $lines[5], 3)), 3, '');
+        [$industry, $duration, $platform, $previewUrl] = array_pad(array_map('trim', explode('|', $lines[5], 4)), 4, '');
         $p = [
             'name' => $lines[0], 'cats' => $cats, 'catLabel' => $catLabel,
             'year' => $year, 'status' => $status !== '' ? $status : 'Live',
             'tech' => $lines[2], 'desc' => $lines[3], 'overview' => $lines[3],
             'features' => $lines[4],
             'industry' => $industry, 'duration' => $duration, 'platform' => $platform,
+            'previewUrl' => $previewUrl,
         ];
         if (isset($lines[6])) {
             $chipIcons = ['fa-chart-line', 'fa-circle-check'];
@@ -70,8 +71,9 @@ $featured = array_slice($projects, 0, 3);
 require_once 'includes/site-header.php';
 
 /** Shared data-attributes for the project detail modal. */
-/** ERP projects preview the live UMS; everything else routes to the demo page. */
+/** A project's own live URL wins; ERP projects preview the live UMS; everything else routes to the demo page. */
 function proj_preview(array $p): string {
+    if (!empty($p['previewUrl'])) return $p['previewUrl'];
     return stripos($p['catLabel'], 'ERP') !== false ? 'ums/index.php' : 'demonstration.php';
 }
 

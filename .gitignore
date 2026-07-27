@@ -19,6 +19,9 @@ ums/uploads/admissions/*
 # ── Database dumps — real data, never commit ──
 maliksolution.sql
 
+# ── Backup archives — huge, redundant with git history, may contain .env ──
+*.zip
+
 # ── OS / editor cruft ──
 .DS_Store
 Thumbs.db
