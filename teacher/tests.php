@@ -54,6 +54,7 @@ $auto_add = !empty($_GET['add']);
               data-venue="<?= htmlspecialchars($t['venue']??'',ENT_QUOTES) ?>"
               data-status="<?= $t['status'] ?>"><i class="fa-solid fa-pen fa-sm"></i></button>
             <form method="POST" action="action.php" class="d-inline" onsubmit="return confirm('Delete this test?')">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
               <input type="hidden" name="action" value="test_delete">
               <input type="hidden" name="id" value="<?= $t['id'] ?>">
               <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash fa-sm"></i></button>
@@ -73,6 +74,7 @@ $auto_add = !empty($_GET['add']);
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content border-0 shadow">
       <form method="POST" action="action.php">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
         <input type="hidden" name="action" value="test_save">
         <input type="hidden" name="id" id="f_id" value="0">
         <div class="modal-header" style="background:#92400e">
