@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = mysqli_fetch_assoc(mysqli_query($conn,
             "SELECT id, name, teacher_password_hash, status FROM teachers WHERE teacher_username='$uname_esc' LIMIT 1"));
         if ($row && $row['status'] === 'active' && password_verify($pass, $row['teacher_password_hash'] ?? '')) {
+            session_regenerate_id(true);
             $_SESSION['teacher_id']   = (int)$row['id'];
             $_SESSION['teacher_name'] = $row['name'];
             header('Location: portal.php');

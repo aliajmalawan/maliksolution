@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_close($stmt);
 
         if ($student) {
+            session_regenerate_id(true);
             $_SESSION['student_id']   = $student['id'];
             $_SESSION['student_name'] = $student['student_name'];
             $_SESSION['student_user'] = $student['username'];

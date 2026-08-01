@@ -3,6 +3,7 @@ declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (empty($_SESSION['teacher_id'])) { header('Location: login.php'); exit; }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: portal.php'); exit; }
+if (!hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'] ?? '')) { header('Location: portal.php'); exit; }
 
 require_once __DIR__ . '/../includes/config.php';
 $tid    = (int)$_SESSION['teacher_id'];

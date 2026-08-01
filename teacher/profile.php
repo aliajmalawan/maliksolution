@@ -46,6 +46,7 @@ include 'header.php';
     <div class="cardx">
       <div class="sec-hd"><h2><i class="fa-solid fa-pen me-2 text-primary"></i>Edit Profile</h2></div>
       <form method="POST" action="action.php">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
         <input type="hidden" name="action" value="profile_save">
         <div class="row g-3">
           <div class="col-md-6">

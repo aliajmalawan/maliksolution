@@ -26,6 +26,7 @@ $err = !empty($_GET['err']) ? ($err_map[$_GET['err']] ?? '') : '';
       <div class="alert alert-danger mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i><?= htmlspecialchars($err) ?></div>
       <?php endif; ?>
       <form method="POST" action="action.php">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
         <input type="hidden" name="action" value="change_password">
         <div class="mb-3">
           <label class="form-label fw-bold">Current Password</label>
