@@ -21,7 +21,6 @@ function stat_pair(string $raw, string $defNum, string $defLabel): array {
     return [$parts[0] !== '' ? $parts[0] : $defNum, $parts[1] ?? $defLabel];
 }
 ?>
-<!-- github test -->
 <!-- ══ HERO SLIDER ══ -->
 <?php
 $slides = [];
