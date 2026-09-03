@@ -3,6 +3,7 @@ declare(strict_types=1);
 // Company footer — content driven by AdminCP → Site Settings
 
 $fSiteName  = get_setting($conn, 'site_name', 'Malik Solution');
+$fLogo      = get_setting($conn, 'logo_white_path', get_setting($conn, 'logo_path', 'maliksolution.png'));
 $fTagline   = get_setting($conn, 'tagline', 'Web · Mobile · Software Solutions');
 $fDesc      = get_setting($conn, 'footer_description', 'A professional software development company crafting high-performance websites, mobile apps, and IT solutions for businesses worldwide.');
 $fPhone     = get_setting($conn, 'contact_phone', '+92 333 2150925');
@@ -18,7 +19,9 @@ $fCopyright = get_setting($conn, 'footer_copyright', '© ' . date('Y') . ' Malik
 
       <!-- Brand -->
       <div class="col-lg-4">
-        <h3 class="footer-brand"><?= htmlspecialchars($fSiteName) ?></h3>
+        <a href="index.php" class="footer-brand-link">
+          <img src="<?= htmlspecialchars($fLogo) ?>" alt="<?= htmlspecialchars($fSiteName) ?>" class="footer-logo">
+        </a>
         <p class="footer-tagline"><?= htmlspecialchars($fTagline) ?></p>
         <p class="footer-desc"><?= htmlspecialchars($fDesc) ?></p>
         <div class="footer-socials">

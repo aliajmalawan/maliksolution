@@ -1146,7 +1146,8 @@ a { text-decoration: none; }
 
 /* ── Footer ──────────────────────────────────────────────── */
 .company-footer { background: var(--navy); color: #b9cbe6; padding: 4rem 0 0; font-size: .9rem; }
-.company-footer .footer-brand { color: #fff; font-weight: 800; font-size: 1.25rem; margin-bottom: .35rem; }
+.footer-brand-link { display: inline-block; margin-bottom: 1rem; }
+.footer-logo { height: 48px; width: auto; max-width: 220px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .35)); }
 .company-footer .footer-tagline { color: #7dd3fc; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 1rem; }
 .company-footer .footer-desc { color: #9fb6d8; font-size: .86rem; }
 .footer-socials { display: flex; gap: .6rem; margin-top: 1.2rem; }

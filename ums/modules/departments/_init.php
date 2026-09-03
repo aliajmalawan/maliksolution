@@ -39,18 +39,8 @@ function dept_find(int $id): ?array
     return $row ?: null;
 }
 
-/** Options list of active departments [id => name] — used by Courses/Teachers/Students. */
-function dept_options(int $campus): array
-{
-    $out = [];
-    $stmt = ums_db()->prepare('SELECT id, name FROM ' . tbl('departments') . ' WHERE campus_id = ? AND status = "active" ORDER BY name');
-    $stmt->bind_param('i', $campus);
-    $stmt->execute();
-    $r = $stmt->get_result();
-    while ($x = $r->fetch_assoc()) $out[(int)$x['id']] = $x['name'];
-    $stmt->close();
-    return $out;
-}
+// dept_options() now lives in includes/crud.php — shared across every
+// module (Courses/Teachers/Students/Portals) that needs a department list.
 
 /** Module URL helper. */
 function dept_url(string $path = ''): string
